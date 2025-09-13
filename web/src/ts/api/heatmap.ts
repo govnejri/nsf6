@@ -10,9 +10,16 @@ export default async function getHeatmap(
 	req: HeatmapRequest
 ): Promise<HeatmapResponse | { error: string }> {
 	const response = await fetch(
-		`/api/heatmap?` +
+		`/api/heatmap/?` +
 			new URLSearchParams({
-				long: String(req.area.topLeft.long),
+				tlLat: req.area.topLeft.lat.toString(),
+				tlLong: req.area.topLeft.long.toString(),
+				brLat: req.area.bottomRight.lat.toString(),
+				brLong: req.area.bottomRight.long.toString(),
+				tileWidth: req.tileWidth.toString(),
+				tileHeight: req.tileHeight.toString(),
+				timeStart: req.timeStart.toISOString(),
+				timeEnd: req.timeEnd.toISOString(),
 			}),
 		{
 			method: "GET",
@@ -33,8 +40,17 @@ export function makeRequest(
 	timeStart: Date,
 	timeEnd: Date
 ): HeatmapRequest {
+
+	// Make sure topLeft and bottomRight are correctly oriented
+	if (topLeft.lat < bottomRight.lat) {
+		[topLeft.lat, bottomRight.lat] = [bottomRight.lat, topLeft.lat];
+	}
+	if (topLeft.long > bottomRight.long) {
+		[topLeft.long, bottomRight.long] = [bottomRight.long, topLeft.long];
+	}
+
 	const tileWidth = (bottomRight.long - topLeft.long) / countX;
-	const tileHeight = (bottomRight.lat - topLeft.lat) / countY;
+	const tileHeight = (topLeft.lat - bottomRight.lat) / countY;
 	return {
 		area: {
 			topLeft,

@@ -1,7 +1,7 @@
 import $ from "jquery";
 import getGL from "./2gis/get";
 import { renderHeatmap } from "./2gis/heatmap";
-import { getMockHeatmap, makeRequest } from "./api/heatmap";
+import getHeatmap, { getMockHeatmap, makeRequest } from "./api/heatmap";
 import { MapPoint } from "./types/common";
 import { AdjustableUpdater } from "./helpers/adjustableUpdater";
 
@@ -40,7 +40,11 @@ getGL().then((mapgl) => {
 				new Date(Date.now() - 24 * 60 * 60 * 1000),
 				new Date()
 			);
-			getMockHeatmap(request).then((res) => {
+			getHeatmap(request).then((res) => {
+				if ('error' in res) {
+					console.error("Heatmap error:", res.error);
+					return;
+				}
 				if (res.heatmap) {
 					renderHeatmap(mapgl, map, res.heatmap);
 				}
