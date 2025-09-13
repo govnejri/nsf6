@@ -16,6 +16,7 @@ image = { version = "^0.25.6", features = ["webp", "jpeg", "png"] }
 webp = "^0.3.1"
 dashmap = "^6.1.0"
 sea-orm = { version = "1.1.14", features = [ "sqlx-postgres", "runtime-actix-rustls", "macros", "with-json" ] }
+sea-orm-migration = { version = "1.1.14", features = ["sqlx-postgres", "runtime-tokio-rustls"] }
 chrono = { version = "0.4.41", features = ["serde"] }
 chrono-tz = "0.10.4"
 utoipa = { version = "5.4.0", features = ["actix_extras", "chrono"] }

@@ -2,3 +2,7 @@ node_modules
 out
 target
 *.lock
+*.csv
+.venv
+.vscode
+__pycache__

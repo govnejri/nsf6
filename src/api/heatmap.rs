@@ -25,6 +25,23 @@ pub struct HeatmapRequest {
     pub tile_height: f64,
 }
 
+// Flat query parameters for GET requests
+#[derive(Debug, Deserialize, Serialize, ToSchema)]
+pub struct HeatmapQueryParams {
+    /// First point (any corner) latitude
+    pub lat1: f64,
+    /// First point (any corner) longitude
+    pub lon1: f64,
+    /// Second point (opposite corner) latitude
+    pub lat2: f64,
+    /// Second point (opposite corner) longitude
+    pub lon2: f64,
+    pub time_start: DateTime<chrono::Utc>,
+    pub time_end: DateTime<chrono::Utc>,
+    pub tile_width: f64,
+    pub tile_height: f64,
+}
+
 #[derive(Debug, Deserialize, Serialize, ToSchema, Clone)]
 pub struct HeatTile {
     pub count: usize,
@@ -49,45 +66,40 @@ pub struct HeatmapResponse {
     path = "/api/heatmap",
     tag = "Heatmap",
     params(
-        ("area" = MapRectangle, Path, description = "Geographical area for the heatmap"),
-        ("time_start" = DateTime<chrono::Utc>, Path, description = "Start of the time range (inclusive)"),
-        ("time_end" = DateTime<chrono::Utc>, Path, description = "End of the time range (inclusive)"),
-        ("tile_width" = f64, Path, description = "Width of each tile in degrees"),
-        ("tile_height" = f64, Path, description = "Height of each tile in degrees"),
+        ("lat1" = f64, Query, description = "Corner 1 latitude"),
+        ("lon1" = f64, Query, description = "Corner 1 longitude"),
+        ("lat2" = f64, Query, description = "Corner 2 latitude"),
+        ("lon2" = f64, Query, description = "Corner 2 longitude"),
+        ("time_start" = DateTime<chrono::Utc>, Query, description = "Start of the time range (inclusive)"),
+        ("time_end" = DateTime<chrono::Utc>, Query, description = "End of the time range (inclusive)"),
+        ("tile_width" = f64, Query, description = "Width of each tile in degrees"),
+        ("tile_height" = f64, Query, description = "Height of each tile in degrees"),
     ),
     responses(
-        (status = 200, description = "Heatmap data", body = HeatmapRequest),
+        (status = 200, description = "Heatmap data", body = HeatmapResponse),
         (status = 500, description = "Server Vzorvalsya"),
     )
 )]
 
-#[get("/")]
+#[get("")]
 pub async fn get_heatmap(
     db: web::Data<DatabaseConnection>,
-    req: web::Json<HeatmapRequest>,
+    qp: web::Query<HeatmapQueryParams>,
 ) -> HttpResponse {
     // Basic validation
-    if req.tile_width <= 0.0 || req.tile_height <= 0.0 {
+    if qp.tile_width <= 0.0 || qp.tile_height <= 0.0 {
         return HttpResponse::BadRequest().body("tile_width and tile_height must be > 0");
     }
 
-    let area = &req.area;
-    let (lat_min, lat_max) = if area.top_left.lat <= area.bottom_right.lat {
-        (area.top_left.lat, area.bottom_right.lat)
-    } else {
-        (area.bottom_right.lat, area.top_left.lat)
-    };
-    let (lon_min, lon_max) = if area.top_left.long <= area.bottom_right.long {
-        (area.top_left.long, area.bottom_right.long)
-    } else {
-        (area.bottom_right.long, area.top_left.long)
-    };
+    // Allow any two opposite corners; compute bounds
+    let (lat_min, lat_max) = if qp.lat1 <= qp.lat2 { (qp.lat1, qp.lat2) } else { (qp.lat2, qp.lat1) };
+    let (lon_min, lon_max) = if qp.lon1 <= qp.lon2 { (qp.lon1, qp.lon2) } else { (qp.lon2, qp.lon1) };
 
     let lat_span = (lat_max - lat_min).max(0.0);
     let lon_span = (lon_max - lon_min).max(0.0);
 
-    let rows = if lat_span == 0.0 { 0 } else { ((lat_span / req.tile_height).ceil() as usize).max(1) };
-    let cols = if lon_span == 0.0 { 0 } else { ((lon_span / req.tile_width).ceil() as usize).max(1) };
+    let rows = if lat_span == 0.0 { 0 } else { ((lat_span / qp.tile_height).ceil() as usize).max(1) };
+    let cols = if lon_span == 0.0 { 0 } else { ((lon_span / qp.tile_width).ceil() as usize).max(1) };
 
     // Early return if degenerate
     if rows == 0 || cols == 0 {
@@ -101,8 +113,8 @@ pub async fn get_heatmap(
     let query = Points::find()
         .filter(points::Column::Lat.between(lat_min, lat_max))
         .filter(points::Column::Lon.between(lon_min, lon_max))
-        .filter(points::Column::Timestamp.gte(req.time_start))
-        .filter(points::Column::Timestamp.lte(req.time_end));
+        .filter(points::Column::Timestamp.gte(qp.time_start))
+        .filter(points::Column::Timestamp.lte(qp.time_end));
 
     let points = match query.all(db.get_ref()).await {
         Ok(p) => p,
@@ -114,8 +126,8 @@ pub async fn get_heatmap(
 
     // Bucket points into tiles
     let mut counts = vec![0usize; rows * cols];
-    let inv_h = 1.0 / req.tile_height;
-    let inv_w = 1.0 / req.tile_width;
+    let inv_h = 1.0 / qp.tile_height;
+    let inv_w = 1.0 / qp.tile_width;
 
     for p in points {
         // Compute indices; clamp to [0, rows-1] / [0, cols-1]
@@ -134,11 +146,11 @@ pub async fn get_heatmap(
     // Build response tiles (row-major from lat_min/lon_min increasing)
     let mut data = Vec::with_capacity(rows * cols);
     for r in 0..rows {
-        let tile_lat_min = lat_min + (r as f64) * req.tile_height;
-        let tile_lat_max = (tile_lat_min + req.tile_height).min(lat_max);
+        let tile_lat_min = lat_min + (r as f64) * qp.tile_height;
+        let tile_lat_max = (tile_lat_min + qp.tile_height).min(lat_max);
         for c in 0..cols {
-            let tile_lon_min = lon_min + (c as f64) * req.tile_width;
-            let tile_lon_max = (tile_lon_min + req.tile_width).min(lon_max);
+            let tile_lon_min = lon_min + (c as f64) * qp.tile_width;
+            let tile_lon_max = (tile_lon_min + qp.tile_width).min(lon_max);
 
             let count = counts[r * cols + c];
             data.push(HeatTile {
