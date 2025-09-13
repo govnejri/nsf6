@@ -22,3 +22,5 @@ chrono-tz = "0.10.4"
 utoipa = { version = "5.4.0", features = ["actix_extras", "chrono"] }
 utoipa-swagger-ui = { version = "9.0.2", features = ["actix-web"] }
 dotenvy = { version = "0.15", default-features = false }
+log = "0.4"
+env_logger = "0.11"

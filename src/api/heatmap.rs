@@ -3,6 +3,10 @@ use chrono::DateTime;
 use sea_orm::{ColumnTrait, DatabaseConnection, EntityTrait, QueryFilter};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
+use log::{info, warn, error, debug};
+use std::time::Instant;
+use sea_orm::QueryOrder;
+use crate::database::model::points::{self, Entity as Points};
 
 #[derive(Debug, Deserialize, Serialize, ToSchema, Clone)]
 pub struct MapPoint {
@@ -94,8 +98,14 @@ pub async fn get_heatmap(
     db: web::Data<DatabaseConnection>,
     qp: web::Query<HeatmapQueryParams>,
 ) -> HttpResponse {
+    let started = Instant::now();
+    debug!(
+        "Heatmap request: tl=({}, {}), br=({}, {}), time=[{}..{}], tile=({}, {})",
+        qp.tl_lat, qp.tl_long, qp.br_lat, qp.br_long, qp.time_start, qp.time_end, qp.tile_width, qp.tile_height
+    );
     // Basic validation
     if qp.tile_width <= 0.0 || qp.tile_height <= 0.0 {
+        warn!("Invalid tile size: width={}, height={}", qp.tile_width, qp.tile_height);
         return HttpResponse::BadRequest().body("tileWidth and tileHeight must be > 0");
     }
 
@@ -112,25 +122,33 @@ pub async fn get_heatmap(
     // Early return if degenerate
     if rows == 0 || cols == 0 {
         let resp = HeatmapResponse { heatmap: HeatmapData { data: vec![] } };
+    info!("Heatmap degenerate area (rows=0 or cols=0), returning empty. took={:?}", started.elapsed());
         return HttpResponse::Ok().json(resp);
     }
 
-    // Query points within bounds and time range
-    use crate::database::model::points::{self, Entity as Points};
-
-    let query = Points::find()
+    // First, get all points within bounds and time range, ordered by timestamp
+    let all_points = match Points::find()
         .filter(points::Column::Lat.between(lat_min, lat_max))
         .filter(points::Column::Lon.between(lon_min, lon_max))
-    .filter(points::Column::Timestamp.gte(qp.time_start))
-    .filter(points::Column::Timestamp.lte(qp.time_end));
-
-    let points = match query.all(db.get_ref()).await {
+        .filter(points::Column::Timestamp.gte(qp.time_start))
+        .filter(points::Column::Timestamp.lte(qp.time_end))
+        .order_by_asc(points::Column::Timestamp)
+        .all(db.get_ref()).await {
         Ok(p) => p,
         Err(e) => {
-            eprintln!("Heatmap query failed: {e}");
+            error!("Heatmap query failed: {}", e);
             return HttpResponse::InternalServerError().finish();
         }
     };
+
+    // Filter to keep only the first point for each randomized_id
+    let total_points_count = all_points.len();
+    let mut seen_trips = std::collections::HashSet::new();
+    let points: Vec<_> = all_points.into_iter()
+        .filter(|point| seen_trips.insert(point.randomized_id))
+        .collect();
+    debug!("Heatmap DB returned {} total points, filtered to {} first points per trip in {:?}", 
+           total_points_count, points.len(), started.elapsed());
 
     // Bucket points into tiles
     let mut counts = vec![0usize; rows * cols];
@@ -152,7 +170,8 @@ pub async fn get_heatmap(
     }
 
     // Build response tiles (row-major from lat_min/lon_min increasing)
-    let mut data = Vec::with_capacity(rows * cols);
+    // Only include tiles with count > 0
+    let mut data = Vec::new();
     for r in 0..rows {
         let tile_lat_min = lat_min + (r as f64) * qp.tile_height;
         let tile_lat_max = (tile_lat_min + qp.tile_height).min(lat_max);
@@ -161,15 +180,22 @@ pub async fn get_heatmap(
             let tile_lon_max = (tile_lon_min + qp.tile_width).min(lon_max);
 
             let count = counts[r * cols + c];
-            data.push(HeatTile {
-                count,
-                top_left: MapPoint { lat: tile_lat_min, long: tile_lon_min },
-                bottom_right: MapPoint { lat: tile_lat_max, long: tile_lon_max },
-            });
+            // Only add tiles with count > 0
+            if count > 0 {
+                data.push(HeatTile {
+                    count,
+                    top_left: MapPoint { lat: tile_lat_min, long: tile_lon_min },
+                    bottom_right: MapPoint { lat: tile_lat_max, long: tile_lon_max },
+                });
+            }
         }
     }
 
     let resp = HeatmapResponse { heatmap: HeatmapData { data } };
+    info!(
+        "Heatmap response: tiles={} (non-zero only) from grid={}x{} points_count={} took={:?}",
+        resp.heatmap.data.len(), rows, cols, counts.iter().sum::<usize>(), started.elapsed()
+    );
     HttpResponse::Ok().json(resp)
 }
 

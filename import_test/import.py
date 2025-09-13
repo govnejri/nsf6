@@ -266,7 +266,7 @@ def post_points(endpoint: str, points: List[Point], timeout: float = 30.0) -> Tu
 
 def main(argv: Optional[List[str]] = None) -> int:
 	ap = argparse.ArgumentParser(description="Import random points into API")
-	ap.add_argument("--file", default="import_test/geo_locations_astana_hackathon.csv", help="Input file path")
+	ap.add_argument("--file", default="geo_locations_astana_hackathon.csv", help="Input file path")
 	ap.add_argument("--format", choices=["auto", "csv", "jsonl", "plain"], default="auto", help="Input format override")
 	ap.add_argument("--endpoint", default="http://127.0.0.1:8080/api/points", help="API endpoint (POST)")
 	ap.add_argument("--sample-size", type=int, default=200, help="Number of points to sample")

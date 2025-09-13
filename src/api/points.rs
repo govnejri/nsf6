@@ -1,7 +1,9 @@
 use actix_web::{post, web, HttpResponse};
-use sea_orm::{ActiveModelTrait, DatabaseConnection, Set};
+use sea_orm::{DatabaseConnection, Set, EntityTrait};
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
+use log::{info, error};
+use std::time::Instant;
 
 #[derive(Debug, Deserialize, Serialize, ToSchema)]
 pub struct NewPoint {
@@ -29,15 +31,22 @@ pub struct PointListRequest {
     )
 )]
 
-#[post("/")]
+#[post("")]
 pub async fn push_points (
     db: web::Data<DatabaseConnection>,
     req: web::Json<PointListRequest>,
 ) -> HttpResponse {
+    let started = Instant::now();
     let points = req.into_inner().points;
+    info!("Received {} points to insert", points.len());
 
-    for point in points {
-        let new_point = crate::database::model::points::ActiveModel {
+    if points.is_empty() {
+        return HttpResponse::BadRequest().body("Empty points list");
+    }
+
+    let models: Vec<crate::database::model::points::ActiveModel> = points
+        .into_iter()
+        .map(|point| crate::database::model::points::ActiveModel {
             randomized_id: Set(point.randomized_id),
             lat: Set(point.lat),
             lon: Set(point.lon),
@@ -45,15 +54,19 @@ pub async fn push_points (
             spd: Set(point.spd),
             azm: Set(point.azm),
             ..Default::default()
-        };
+        })
+        .collect();
 
-        if let Err(e) = new_point.insert(db.get_ref()).await {
-            eprintln!("Failed to insert point: {}", e);
-            return HttpResponse::InternalServerError().finish();
+    match crate::database::model::points::Entity::insert_many(models).exec(db.get_ref()).await {
+        Ok(_) => {
+            info!("Inserted points in {:?}", started.elapsed());
+            HttpResponse::Ok().finish()
+        }
+        Err(e) => {
+            error!("Batch insert failed: {}", e);
+            HttpResponse::InternalServerError().finish()
         }
     }
-
-    HttpResponse::Ok().finish()
 }
 
 pub fn init_routes(cfg: &mut web::ServiceConfig) {

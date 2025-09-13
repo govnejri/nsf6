@@ -1,5 +1,7 @@
 use actix_files as fs;
 use actix_web::{web, App, HttpServer, middleware};
+use env_logger::Env;
+use log::info;
 use dotenvy::dotenv;
 use sea_orm::Database;
 use sea_orm_migration::MigratorTrait;
@@ -17,6 +19,9 @@ async fn main() -> std::io::Result<()> {
     // Load environment variables from .env if present
     dotenv().ok();
 
+    // Initialize logger (RUST_LOG overrides default if set)
+    env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
+
     // Establish database connection and run migrations before starting the server
     let database_url = env::var("DATABASE_URL")
         .expect("DATABASE_URL must be set (e.g., postgres://user:pass@host:5432/db)");
@@ -29,10 +34,12 @@ async fn main() -> std::io::Result<()> {
         .await
         .expect("Failed to run database migrations");
 
-    println!("Server running at http://127.0.0.1:8080");
+    info!("Server running at http://127.0.0.1:8080");
     HttpServer::new(move || {
         App::new()
             .wrap(actix_web::middleware::Compress::default())
+            // Log each incoming request with status, time, and size
+            .wrap(middleware::Logger::new("%a \"%r\" %s %b %T"))
             // Share DB connection pool with handlers
             .app_data(web::Data::new(db.clone()))
             .route("/static/assets/img/{filename:.*}", web::get().to(image_compressor::serve_optimized_image))
