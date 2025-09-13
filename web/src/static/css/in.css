@@ -3,3 +3,35 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 @source "web/src/**/*";
+
+@layer base {
+    h1 {
+        @apply text-4xl font-bold mb-4;
+    }
+    
+
+    body {
+        @apply bg-white text-black dark:bg-gray-900 dark:text-white;
+    }
+
+    button {
+        @apply bg-gray-500 text-white p-2 rounded-lg;
+        &.primary {
+            @apply bg-blue-500;
+        }
+        &.secondary {
+            @apply bg-green-500;
+        }
+        &.danger {
+            @apply bg-red-500;
+        }
+    }
+}
+
+@layer components {
+    .map {
+        @apply w-full h-96;
+    }
+
+
+}
