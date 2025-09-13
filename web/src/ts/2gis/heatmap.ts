@@ -2,7 +2,7 @@ import type * as gis from "@2gis/mapgl/types/index";
 import { Heatmap } from "../types/heatmap";
 
 
-const polygonsToRemove: gis.Polygon[] = [];
+const polygonRemoveCallbacks: (() => void)[] = [];
 
 /**
  * Render heatmap grid onto a given mapgl.Map instance.
@@ -13,7 +13,8 @@ export function renderHeatmap(
 	heatmap: Heatmap
 ) {
     // Kill old heatmap polygons
-    polygonsToRemove.forEach((poly) => poly.destroy());
+    polygonRemoveCallbacks.forEach((cb) => cb());
+	polygonRemoveCallbacks.length = 0;
 
 	const maxCount = Math.max(...heatmap.data.map((rect) => rect.count), 1);
 	heatmap.data.forEach((rect, idx) => {
@@ -28,12 +29,11 @@ export function renderHeatmap(
 				],
 			],
 			color: getColorForCount(rect.count, maxCount),
-			strokeColor: "rgba(0,0,0,0.1)",
-			strokeWidth: 1,
+			strokeWidth: 0,
 			zIndex: 1,
             userData: { heatmapRemove: true, idx }
 		});
-        polygonsToRemove.push(polygon);
+        polygonRemoveCallbacks.push(() => polygon.destroy());
 	});
 }
 

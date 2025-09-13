@@ -9,10 +9,18 @@
 </head>
 <body>
     <div id="app">
-        <h1>Hello, NSF6!</h1>
-        <div id="map" class="w-full h-[700px]"> </div>
-        <button>Click me</button>
+        <div class="relative z-10 bg-transparent">
+            <div class="card w-fit">
+                <h1>Hello, NSF6!</h1>
+                <label>
+                    Update interval (ms):
+                    <input id="update-interval" type="range" min="100" max="5000" value="1000" step="100">
+                    <span id="update-interval-value">1000</span>
+                </label>
+            </div>
+        </div>
+        <div id="map" class="map"> </div>
     </div>
-    <script src="/static/js/hello-world.js" type="module"></script>
+    <script src="/static/js/index.js" type="module"></script>
 </body>
 </html>

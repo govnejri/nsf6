@@ -34,8 +34,10 @@
 
 @layer components {
     .map {
-        @apply w-full h-96;
+        @apply w-screen h-screen fixed top-0 left-0;
     }
 
-
+    .card {
+        @apply bg-white dark:bg-gray-800 shadow-lg rounded-lg p-6;
+    }
 }
