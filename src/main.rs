@@ -5,7 +5,7 @@ mod templates;
 mod image_compressor;
 mod database;
 mod api;
-use api::{points};
+use api::{points, heatmap};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -24,6 +24,7 @@ async fn main() -> std::io::Result<()> {
             .service(web::scope("/api")
                 .wrap(middleware::NormalizePath::trim())
                 .configure(points::init_routes)
+                .configure(heatmap::init_routes)
             )
             .default_service(web::route().to(routes::not_found))
     })
