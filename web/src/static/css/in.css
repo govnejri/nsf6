@@ -26,6 +26,10 @@
             @apply bg-red-500;
         }
     }
+
+    img {
+        @apply max-w-full h-auto;
+    }
 }
 
 @layer components {

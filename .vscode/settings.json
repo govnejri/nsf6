@@ -1,0 +1,6 @@
+{
+    "tailwindCSS.experimental.configFile": {
+        "./web/src/static/css/styles/base/colors.css": "web/src/**/*",
+        "./web/src/static/css/styles/in.css": "web/src/**/*"
+    },
+}
