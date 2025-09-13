@@ -11,10 +11,16 @@ RUN npm run build
 # Stage 2: rust application
 FROM rust:latest AS rust-build
 WORKDIR /app
-COPY --from=build /app/web/out ./web/out
 COPY Cargo.toml Cargo.lock ./
+
+# Workaround to trick rust into caching dependencies
+RUN mkdir src && echo 'fn main() { print!("if you see this, the build broke"); }' > src/main.rs && cargo build --release && rm -rf src && rm -rf target/release/deps/indrive*
+
+# Now copy the real source code
+COPY --from=build /app/web/out ./web/out
 COPY src ./src
 RUN cargo build --release
+
 RUN strip target/release/indrive
 RUN mv target/release/indrive ./indrive
 RUN rm -rf src target
