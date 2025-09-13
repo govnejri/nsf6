@@ -25,20 +25,28 @@ pub struct HeatmapRequest {
     pub tile_height: f64,
 }
 
-// Flat query parameters for GET requests
+// Flat query parameters for GET requests (external names in camelCase)
 #[derive(Debug, Deserialize, Serialize, ToSchema)]
 pub struct HeatmapQueryParams {
-    /// First point (any corner) latitude
-    pub lat1: f64,
-    /// First point (any corner) longitude
-    pub lon1: f64,
-    /// Second point (opposite corner) latitude
-    pub lat2: f64,
-    /// Second point (opposite corner) longitude
-    pub lon2: f64,
+    /// Top-left latitude
+    #[serde(rename = "tlLat")]
+    pub tl_lat: f64,
+    /// Top-left longitude
+    #[serde(rename = "tlLong")]
+    pub tl_long: f64,
+    /// Bottom-right latitude
+    #[serde(rename = "brLat")]
+    pub br_lat: f64,
+    /// Bottom-right longitude
+    #[serde(rename = "brLong")]
+    pub br_long: f64,
+    #[serde(rename = "timeStart")]
     pub time_start: DateTime<chrono::Utc>,
+    #[serde(rename = "timeEnd")]
     pub time_end: DateTime<chrono::Utc>,
+    #[serde(rename = "tileWidth")]
     pub tile_width: f64,
+    #[serde(rename = "tileHeight")]
     pub tile_height: f64,
 }
 
@@ -66,14 +74,14 @@ pub struct HeatmapResponse {
     path = "/api/heatmap",
     tag = "Heatmap",
     params(
-        ("lat1" = f64, Query, description = "Corner 1 latitude"),
-        ("lon1" = f64, Query, description = "Corner 1 longitude"),
-        ("lat2" = f64, Query, description = "Corner 2 latitude"),
-        ("lon2" = f64, Query, description = "Corner 2 longitude"),
-        ("time_start" = DateTime<chrono::Utc>, Query, description = "Start of the time range (inclusive)"),
-        ("time_end" = DateTime<chrono::Utc>, Query, description = "End of the time range (inclusive)"),
-        ("tile_width" = f64, Query, description = "Width of each tile in degrees"),
-        ("tile_height" = f64, Query, description = "Height of each tile in degrees"),
+    ("tlLat" = f64, Query, description = "Top-left latitude"),
+    ("tlLong" = f64, Query, description = "Top-left longitude"),
+    ("brLat" = f64, Query, description = "Bottom-right latitude"),
+    ("brLong" = f64, Query, description = "Bottom-right longitude"),
+    ("timeStart" = DateTime<chrono::Utc>, Query, description = "Start of the time range (inclusive)"),
+    ("timeEnd" = DateTime<chrono::Utc>, Query, description = "End of the time range (inclusive)"),
+    ("tileWidth" = f64, Query, description = "Width of each tile in degrees"),
+    ("tileHeight" = f64, Query, description = "Height of each tile in degrees"),
     ),
     responses(
         (status = 200, description = "Heatmap data", body = HeatmapResponse),
@@ -88,12 +96,12 @@ pub async fn get_heatmap(
 ) -> HttpResponse {
     // Basic validation
     if qp.tile_width <= 0.0 || qp.tile_height <= 0.0 {
-        return HttpResponse::BadRequest().body("tile_width and tile_height must be > 0");
+        return HttpResponse::BadRequest().body("tileWidth and tileHeight must be > 0");
     }
 
     // Allow any two opposite corners; compute bounds
-    let (lat_min, lat_max) = if qp.lat1 <= qp.lat2 { (qp.lat1, qp.lat2) } else { (qp.lat2, qp.lat1) };
-    let (lon_min, lon_max) = if qp.lon1 <= qp.lon2 { (qp.lon1, qp.lon2) } else { (qp.lon2, qp.lon1) };
+    let (lat_min, lat_max) = if qp.tl_lat <= qp.br_lat { (qp.tl_lat, qp.br_lat) } else { (qp.br_lat, qp.tl_lat) };
+    let (lon_min, lon_max) = if qp.tl_long <= qp.br_long { (qp.tl_long, qp.br_long) } else { (qp.br_long, qp.tl_long) };
 
     let lat_span = (lat_max - lat_min).max(0.0);
     let lon_span = (lon_max - lon_min).max(0.0);
@@ -113,8 +121,8 @@ pub async fn get_heatmap(
     let query = Points::find()
         .filter(points::Column::Lat.between(lat_min, lat_max))
         .filter(points::Column::Lon.between(lon_min, lon_max))
-        .filter(points::Column::Timestamp.gte(qp.time_start))
-        .filter(points::Column::Timestamp.lte(qp.time_end));
+    .filter(points::Column::Timestamp.gte(qp.time_start))
+    .filter(points::Column::Timestamp.lte(qp.time_end));
 
     let points = match query.all(db.get_ref()).await {
         Ok(p) => p,
