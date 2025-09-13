@@ -1,0 +1,16 @@
+[package]
+name = "indrive"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+actix-web = { version = "4", features = ["compress-gzip", "compress-brotli"] }
+actix-files = "^0.6.7"
+minijinja = {version = "2.11", features = ["loader"]}
+minijinja-autoreload = { version = "2.11", features = ["watch-fs"] }
+once_cell = "1.19"
+serde = { version = "1.0", features = ["derive"] }
+tokio = { version = "1.0", features = ["full"] }
+image = { version = "^0.25.6", features = ["webp", "jpeg", "png"] }
+webp = "^0.3.1"
+dashmap = "^6.1.0"
