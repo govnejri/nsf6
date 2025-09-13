@@ -14,7 +14,7 @@ let updater: AdjustableUpdater | null = null;
 
 getGL().then((mapgl) => {
     const map = new mapgl.Map("map", {
-		center: [76.882, 43.238],
+		center: [71.4272, 51.1655],
 		zoom: 8,
 		// Demo-key here, use some backend proxy in prod
 		key: "96f35a47-3653-4109-ac5b-1365fe492cc9",
