@@ -5,6 +5,7 @@ import getHeatmap, { getMockHeatmap, makeRequest } from "./api/heatmap";
 import { MapPoint } from "./types/common";
 import { AdjustableUpdater } from "./helpers/adjustableUpdater";
 import { TimeSlider } from "./components/timeSlider";
+import astanaMap from "./helpers/astanaMap";
 
 function getUpdateInterval(): number {
 	return parseInt($("#update-interval").val() as string) || 1000;
@@ -20,12 +21,7 @@ const timeSlider = new TimeSlider({
 });
 
 getGL().then((mapgl) => {
-	const map = new mapgl.Map("map", {
-		center: [71.4272, 51.1655],
-		zoom: 14,
-		// Demo-key here, use some backend proxy in prod
-		key: "96f35a47-3653-4109-ac5b-1365fe492cc9",
-	});
+	const map = astanaMap(mapgl);
 
 	map.on("styleload", () => {
 		updater = new AdjustableUpdater(async () => {
@@ -45,11 +41,11 @@ getGL().then((mapgl) => {
 			let endHour: number;
 			if ((timeSlider as any).options?.type === "hours") {
 				startHour = leftValue;
-				endHour = rightValue + 1; // inclusive -> exclusive
+				endHour = rightValue; // inclusive -> exclusive
 			} else {
 				// days-of-week: approximate to whole days (multiply by 24)
 				startHour = leftValue * 24;
-				endHour = (rightValue + 1) * 24;
+				endHour = rightValue * 24;
 			}
 
 			const request = makeRequest(

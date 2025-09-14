@@ -10,10 +10,10 @@ export default async function getHeatmap(
 	req: HeatmapRequest
 ): Promise<HeatmapResponse | { error: string }> {
 	const params = new URLSearchParams();
-	params.set("tlLat", req.area.topLeft.lat.toString());
-	params.set("tlLong", req.area.topLeft.long.toString());
-	params.set("brLat", req.area.bottomRight.lat.toString());
-	params.set("brLong", req.area.bottomRight.long.toString());
+	params.set("lat1", req.area.topLeft.lat.toString());
+	params.set("lon1", req.area.topLeft.long.toString());
+	params.set("lat2", req.area.bottomRight.lat.toString());
+	params.set("lon2", req.area.bottomRight.long.toString());
 	params.set("tileWidth", req.tileWidth.toString());
 	params.set("tileHeight", req.tileHeight.toString());
 	if (req.timeStart) params.set("timeStart", req.timeStart);

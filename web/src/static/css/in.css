@@ -32,10 +32,10 @@
     }
 
     input[type="range"] {
-        @apply appearance-none w-full h-2 bg-primary-500/30 rounded-lg cursor-pointer focus:outline-none;
+        @apply appearance-none w-full h-2 bg-primary-500 rounded-lg cursor-pointer focus:outline-none;
 
         &::-webkit-slider-runnable-track {
-            @apply h-2 bg-primary-500/30 rounded-lg;
+            @apply h-2 bg-primary-500 rounded-lg;
         }
 
         &::-webkit-slider-thumb {
@@ -44,7 +44,7 @@
         }
 
         &::-moz-range-track {
-            @apply h-2 bg-primary-500/30 rounded-lg;
+            @apply h-2 bg-primary-500 rounded-lg;
         }
 
         &::-moz-range-thumb {

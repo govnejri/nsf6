@@ -50,6 +50,7 @@ async fn main() -> std::io::Result<()> {
                     .use_last_modified(true)
             )
             .route("/", web::get().to(routes::index))
+            .route("/paint", web::get().to(routes::paint))
             .service(web::scope("/api")
                 .wrap(middleware::NormalizePath::trim())
                 .configure(points::init_routes)
