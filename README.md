@@ -30,7 +30,7 @@ Not so Far - веб-приложение для анализа и визуали
 
 ## Полезные ссылки
 - [Демо](https://indrive.notsofar.live)
-- [Папа со презентацией](https://drive.google.com/drive/folders/1_iUVDPaoIMY0XAkwV2OdvYzY7o-DGjer?usp=sharing)
+- [Папа с презентацией](https://drive.google.com/drive/folders/1_iUVDPaoIMY0XAkwV2OdvYzY7o-DGjer?usp=sharing)
 - [Сайт хакатона Decentraton 4.0](https://astanahub.com/en/event/decentrathon-4-0)
 
 # Для разработчиков
