@@ -29,6 +29,7 @@ impl MigrationTrait for Migration {
                             .timestamp_with_time_zone()
                             .default(Expr::current_timestamp()),
                     )
+                    .col(ColumnDef::new(Points::Anomaly).boolean())
                     .to_owned(),
             )
             .await
@@ -52,4 +53,5 @@ enum Points {
     Spd,
     Azm,
     Timestamp,
+    Anomaly
 }
