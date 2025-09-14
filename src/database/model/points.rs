@@ -9,7 +9,7 @@ pub struct Model {
     pub id: i64,
     pub randomized_id: i64,
     pub lat: f64,
-    pub lon: f64,
+    pub lng: f64,
     pub alt: f64,
     pub spd: f64,
     pub azm: f64,

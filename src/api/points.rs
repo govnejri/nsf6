@@ -75,7 +75,7 @@ pub async fn push_points (
         let mut active = PointActiveModel {
             randomized_id: Set(p.randomized_id),
             lat: Set(p.lat),
-            lon: Set(p.lng),
+            lng: Set(p.lng),
             alt: Set(p.alt.unwrap_or(0.0)),
             spd: Set(p.spd),
             azm: Set(p.azm),
@@ -109,14 +109,14 @@ pub async fn push_points (
                         let first_model: &PointModel = &existing[0];
                         // Convert DB model to webhook point; fallback timestamp to now if missing
                         let first_ts = first_model.timestamp.unwrap_or_else(|| Utc::now());
-                        let first = WebhookPoint { lat: first_model.lat, lng: first_model.lon, azm: first_model.azm, timestamp: first_ts };
+                        let first = WebhookPoint { lat: first_model.lat, lng: first_model.lng, azm: first_model.azm, timestamp: first_ts };
 
                         // Gone: rest of DB points (skip first), by descending timestamp
                         let mut gone: Vec<WebhookPoint> = Vec::new();
                         if existing.len() > 1 {
                             for m in existing.iter().skip(1) {
                                 let ts = m.timestamp.unwrap_or_else(|| Utc::now());
-                                gone.push(WebhookPoint { lat: m.lat, lng: m.lon, azm: m.azm, timestamp: ts });
+                                gone.push(WebhookPoint { lat: m.lat, lng: m.lng, azm: m.azm, timestamp: ts });
                             }
                         }
 

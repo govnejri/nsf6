@@ -146,7 +146,7 @@ pub async fn get_speedmap(
     // First, get all points within bounds and optional time range, ordered by timestamp
     let mut query = Points::find()
         .filter(points::Column::Lat.between(lat_min, lat_max))
-        .filter(points::Column::Lon.between(lon_min, lon_max));
+        .filter(points::Column::lng.between(lon_min, lon_max));
     if let Some(ts_start) = qp.date_start { query = query.filter(points::Column::Timestamp.gte(ts_start)); }
     if let Some(ts_end) = qp.date_end { query = query.filter(points::Column::Timestamp.lte(ts_end)); }
     let mut all_points = match query
@@ -197,7 +197,7 @@ pub async fn get_speedmap(
     for p in all_points {
         // Compute indices; clamp to [0, rows-1] / [0, cols-1]
         let mut r = ((p.lat - lat_min) * inv_h).floor() as isize;
-        let mut c = ((p.lon - lon_min) * inv_w).floor() as isize;
+        let mut c = ((p.lng - lon_min) * inv_w).floor() as isize;
 
         if r < 0 { r = 0; }
         if c < 0 { c = 0; }

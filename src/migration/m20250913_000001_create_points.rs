@@ -20,7 +20,7 @@ impl MigrationTrait for Migration {
                     )
                     .col(ColumnDef::new(Points::RandomizedId).big_integer().not_null())
                     .col(ColumnDef::new(Points::Lat).double().not_null())
-                    .col(ColumnDef::new(Points::Lon).double().not_null())
+                    .col(ColumnDef::new(Points::Lng).double().not_null())
                     .col(ColumnDef::new(Points::Alt).double().not_null())
                     .col(ColumnDef::new(Points::Spd).double().not_null())
                     .col(ColumnDef::new(Points::Azm).double().not_null())
@@ -48,7 +48,7 @@ enum Points {
     Id,
     RandomizedId,
     Lat,
-    Lon,
+    Lng,
     Alt,
     Spd,
     Azm,
