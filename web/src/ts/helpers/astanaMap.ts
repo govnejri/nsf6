@@ -8,5 +8,6 @@ export default function astanaMap(mapgl: typeof gis, disableDragging: boolean): 
         // Demo-key here, use some backend proxy in prod
         key: "96f35a47-3653-4109-ac5b-1365fe492cc9",
         disableDragging,
+        zoomControl: false,
     });
 }

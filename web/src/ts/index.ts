@@ -48,11 +48,32 @@ getGL().then((mapgl) => {
 				endHour = rightValue * 24;
 			}
 
+			// Dynamically derive grid size from current map (or window) dimensions.
+			// Largest grid dimension capped at 20; other dimension scaled by aspect ratio.
+			const mapEl = document.getElementById("map");
+			const pxWidth = mapEl?.clientWidth || window.innerWidth;
+			const pxHeight = mapEl?.clientHeight || window.innerHeight;
+
+			let gridW: number;
+			let gridH: number;
+
+			if (pxWidth >= pxHeight) {
+				gridW = 20;
+				gridH = Math.max(1, Math.round((pxHeight / pxWidth) * 20));
+			} else {
+				gridH = 20;
+				gridW = Math.max(1, Math.round((pxWidth / pxHeight) * 20));
+			}
+
+			// Safety clamp
+			gridW = Math.min(20, Math.max(1, gridW));
+			gridH = Math.min(20, Math.max(1, gridH));
+
 			const request = makeRequest(
 				topLeft,
 				bottomRight,
-				96,
-				54,
+				gridW,
+				gridH,
 				startHour,
 				endHour,
 				undefined,

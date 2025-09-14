@@ -297,8 +297,9 @@ export class TimeSlider {
 					: TimeSlider.DAY_LABELS_RU[i];
 			const tick = $("<span></span>")
 				.text(label)
-				.css("left", this.valueToPercent(i) + "%");
-			this.ticks.append(tick);
+				.css("left", this.valueToPercent(i) + "%")
+				.css("transform", `translateX(-${this.valueToPercent(i)}%)`);
+				this.ticks.append(tick);
 		}
 	}
 
@@ -324,10 +325,12 @@ export class TimeSlider {
 
 		this.leftHandle
 			.css("left", `${leftPercent}%`)
+			.css("transform", `translateX(-${leftPercent}%)`)
 			.attr("aria-valuenow", this.state.leftValue)
 			.attr("aria-valuemax", this.state.rightValue);
 		this.rightHandle
 			.css("left", `${rightPercent}%`)
+			.css("transform", `translateX(-${rightPercent}%)`)
 			.attr("aria-valuenow", this.state.rightValue)
 			.attr("aria-valuemin", this.state.leftValue);
 
@@ -339,7 +342,9 @@ export class TimeSlider {
 		const text = this.formatRangeLabel();
 		this.label.text(text);
 		const rangeCenter = (leftPercent + rightPercent) / 2;
-		this.label.css("left", `${rangeCenter}%`);
+		this.label
+			.css("left", `${rangeCenter}%`)
+			.css("transform", `translateX(-${rangeCenter}%)`);
 
 		if (triggerCallback) {
 			this.options.onChange({
