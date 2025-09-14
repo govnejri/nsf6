@@ -3,8 +3,8 @@ import { MapPoint } from "../types/common";
 export type TimedPoint = {
 	randomized_id: number;
 	timestamp: Date;
-	velocity: number;
-	azimuth: number;
+	spd: number;
+	azm: number;
 } & MapPoint;
 
 export type PostPoints = { points: TimedPoint[] };
@@ -40,8 +40,8 @@ export function makeRequest(
 				randomized_id: id,
 				...point,
 				timestamp: curDate,
-				velocity,
-				azimuth,
+				spd:velocity,
+				azm:azimuth,
 			};
 		}),
 	};
