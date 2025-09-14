@@ -12,7 +12,7 @@ mod image_compressor;
 mod database;
 mod api;
 mod migration;
-use api::{points, heatmap, traficmap, velocitymap};
+use api::{points, heatmap, traficmap, velocitymap, zaglushka};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -57,6 +57,7 @@ async fn main() -> std::io::Result<()> {
                 .configure(heatmap::init_routes)
                 .configure(traficmap::init_routes)
                 .configure(velocitymap::init_routes)
+                .configure(zaglushka::init_routes)
             )
             .default_service(web::route().to(routes::not_found))
     })

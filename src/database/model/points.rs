@@ -15,6 +15,7 @@ pub struct Model {
     pub azm: f64,
     #[sea_orm(default_expr = "Expr::current_timestamp()")]
     pub timestamp: Option<DateTime<Utc>>,
+    pub anomaly: Option<bool>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

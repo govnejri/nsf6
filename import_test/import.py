@@ -135,7 +135,7 @@ def iter_csv_rows(path: str) -> Iterator[Dict[str, object]]:
 				row: Dict[str, object] = {}
 				if len(vals) >= 2:
 					row["lat"] = vals[0]
-					row["lon"] = vals[1]
+					row["lng"] = vals[1]
 				if len(vals) >= 3:
 					row["alt"] = vals[2]
 				if len(vals) >= 4:
@@ -157,7 +157,7 @@ def iter_plain_numeric(path: str) -> Iterator[Dict[str, object]]:
 				continue
 			row: Dict[str, object] = {
 				"lat": tokens[0],
-				"lon": tokens[1],
+				"lng": tokens[1],
 			}
 			if len(tokens) >= 3:
 				row["alt"] = tokens[2]
@@ -201,13 +201,13 @@ def row_to_point(row: Dict[str, object]) -> Optional[Point]:
 	id_k = _find_key(row, ID_KEYS)
 
 	lat = _to_float(row.get(lat_k))
-	lon = _to_float(row.get(lon_k))
+	lng = _to_float(row.get(lon_k))
 	alt = _to_float(row.get(alt_k), 0.0) if alt_k else 0.0
 	spd = _to_float(row.get(spd_k), 0.0) if spd_k else 0.0
 	azm = _to_float(row.get(azm_k), 0.0) if azm_k else 0.0
 
 	# Basic sanity
-	if not (-90.0 <= lat <= 90.0) or not (-180.0 <= lon <= 180.0):
+	if not (-90.0 <= lat <= 90.0) or not (-180.0 <= lng <= 180.0):
 		return None
 
 	rid = row.get(id_k) if id_k else None
@@ -216,7 +216,7 @@ def row_to_point(row: Dict[str, object]) -> Optional[Point]:
 	except Exception:
 		rid_int = _gen_random_id()
 
-	return Point(randomized_id=rid_int, lat=lat, lon=lon, alt=alt, spd=spd, azm=azm)
+	return Point(randomized_id=rid_int, lat=lat, lon=lng, alt=alt, spd=spd, azm=azm)
 
 
 # --- Reservoir sampling ------------------------------------------------------

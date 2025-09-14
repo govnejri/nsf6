@@ -36,14 +36,14 @@ pub struct TraficmapQueryParams {
     #[serde(rename = "lat1")]
     pub lat1: f64,
     /// First longitude (corner)
-    #[serde(rename = "lon1")]
-    pub lon1: f64,
+    #[serde(rename = "lng1")]
+    pub lng1: f64,
     /// Second latitude (opposite corner)
     #[serde(rename = "lat2")]
     pub lat2: f64,
     /// Second longitude (opposite corner)
-    #[serde(rename = "lon2")]
-    pub lon2: f64,
+    #[serde(rename = "lng2")]
+    pub lng2: f64,
     /// Optional date range start (inclusive)
     #[serde(rename = "dateStart")]
     pub date_start: Option<DateTime<chrono::Utc>>,
@@ -92,9 +92,9 @@ pub struct TraficmapResponse {
     tag = "Traficmap",
     params(
     ("lat1" = f64, Query, description = "First latitude (corner)"),
-    ("lon1" = f64, Query, description = "First longitude (corner)"),
+    ("lng1" = f64, Query, description = "First longitude (corner)"),
     ("lat2" = f64, Query, description = "Second latitude (opposite corner)"),
-    ("lon2" = f64, Query, description = "Second longitude (opposite corner)"),
+    ("lng2" = f64, Query, description = "Second longitude (opposite corner)"),
     ("dateStart" = DateTime<chrono::Utc>, Query, description = "Start of the date/time range (inclusive). Optional"),
     ("dateEnd" = DateTime<chrono::Utc>, Query, description = "End of the date/time range (inclusive). Optional"),
     ("tileWidth" = f64, Query, description = "Width of each tile in degrees"),
@@ -117,7 +117,7 @@ pub async fn get_traficmap(
     let started = Instant::now();
     debug!(
         "Traficmap request: corners=({}, {}), ({}, {}), date=[{:?}..{:?}], tile=({}, {}), days={:?}, tod=[{:?}..{:?}]",
-        qp.lat1, qp.lon1, qp.lat2, qp.lon2, qp.date_start, qp.date_end, qp.tile_width, qp.tile_height, qp.days, qp.time_start_tod, qp.time_end_tod
+        qp.lat1, qp.lng1, qp.lat2, qp.lng2, qp.date_start, qp.date_end, qp.tile_width, qp.tile_height, qp.days, qp.time_start_tod, qp.time_end_tod
     );
     // Basic validation
     if qp.tile_width <= 0.0 || qp.tile_height <= 0.0 {
@@ -127,7 +127,7 @@ pub async fn get_traficmap(
 
     // Allow any two opposite corners; compute bounds
     let (lat_min, lat_max) = if qp.lat1 <= qp.lat2 { (qp.lat1, qp.lat2) } else { (qp.lat2, qp.lat1) };
-    let (lon_min, lon_max) = if qp.lon1 <= qp.lon2 { (qp.lon1, qp.lon2) } else { (qp.lon2, qp.lon1) };
+    let (lon_min, lon_max) = if qp.lng1 <= qp.lng2 { (qp.lng1, qp.lng2) } else { (qp.lng2, qp.lng1) };
 
     let lat_span = (lat_max - lat_min).max(0.0);
     let lon_span = (lon_max - lon_min).max(0.0);
