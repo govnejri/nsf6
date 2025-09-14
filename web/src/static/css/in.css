@@ -30,6 +30,32 @@
     img {
         @apply max-w-full h-auto;
     }
+
+    input[type="range"] {
+        @apply appearance-none w-full h-2 bg-primary-500/30 rounded-lg cursor-pointer focus:outline-none;
+
+        &::-webkit-slider-runnable-track {
+            @apply h-2 bg-primary-500/30 rounded-lg;
+        }
+
+        &::-webkit-slider-thumb {
+            @apply appearance-none w-4 h-4 -mt-1 bg-white border-2 border-primary-500 rounded-full shadow transition
+                         hover:bg-primary-500 hover:border-white focus:ring-2 focus:ring-primary-500;
+        }
+
+        &::-moz-range-track {
+            @apply h-2 bg-primary-500/30 rounded-lg;
+        }
+
+        &::-moz-range-thumb {
+            @apply w-4 h-4 bg-white border-2 border-primary-500 rounded-full shadow transition
+                         hover:bg-primary-500 hover:border-white focus:ring-2 focus:ring-primary-500;
+        }
+
+        &:disabled {
+            @apply opacity-50 cursor-not-allowed;
+        }
+    }
 }
 
 @layer components {

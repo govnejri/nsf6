@@ -1,0 +1,13 @@
+@theme {
+    --color-primary-50: oklch(0.99 0.026 123.34);
+    --color-primary-100: oklch(0.979 0.054 124.11);
+    --color-primary-200: oklch(0.957 0.12 123.94);
+    --color-primary-300: oklch(0.926 0.222 123.16);
+    --color-primary-400: oklch(0.909 0.218 123.19);
+    --color-primary-500: oklch(0.892 0.214 123.22);
+    --color-primary-600: oklch(77.381% 0.19395 124.817);
+    --color-primary-700: oklch(0.586 0.141 123.44);
+    --color-primary-800: oklch(0.442 0.106 123.25);
+    --color-primary-900: oklch(0.288 0.07 123.48);
+    --color-primary-950: oklch(0.211 0.05 123.54);
+  }

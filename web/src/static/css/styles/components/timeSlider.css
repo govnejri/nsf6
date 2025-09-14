@@ -18,18 +18,18 @@
 
 	/* Selected range */
 	.time-slider-range {
-		@apply absolute top-1/2 -translate-y-1/2 h-2 rounded-full bg-gradient-to-r from-blue-500 to-blue-400 shadow transition-[left,width] duration-150 ease-linear;
+		@apply absolute top-1/2 -translate-y-1/2 h-2 rounded-full bg-gradient-to-r from-primary-500 to-primary-400 shadow transition-[left,width] duration-150 ease-linear;
 	}
 
 	/* Handles */
 	.time-slider-handle {
-		@apply absolute top-1/2 -translate-y-1/2 w-5 h-5 bg-white border-2 border-blue-500 rounded-full shadow-lg cursor-grab flex items-center justify-center text-[10px] font-medium text-blue-600 transition duration-150 ease-out;
+		@apply absolute top-1/2 -translate-y-1/2 w-5 h-5 bg-white border-2 border-primary-500 rounded-full shadow-lg cursor-grab flex items-center justify-center text-[10px] font-medium text-primary-600 transition duration-150 ease-out;
 	}
 	.time-slider-handle:hover {
-		@apply bg-blue-50;
+		@apply bg-primary-50;
 	}
 	.time-slider-handle:focus-visible {
-		@apply outline-none ring-4 ring-blue-300/40;
+		@apply outline-none ring-4 ring-primary-500/40;
 	}
 	.time-slider-handle:active {
 		@apply cursor-grabbing;
@@ -38,7 +38,7 @@
 
 	/* Floating combined label */
 	.time-slider-label {
-		@apply absolute -translate-x-1/2 -translate-y-full top-0 px-3 py-1 rounded-md text-xs font-medium tracking-wide bg-blue-600 text-white shadow whitespace-nowrap pointer-events-none select-none;
+		@apply absolute -translate-x-1/2 -translate-y-full top-0 px-3 py-1 rounded-md text-xs font-medium tracking-wide bg-primary-500 text-primary-900 shadow whitespace-nowrap pointer-events-none select-none;
 		transform-origin: center bottom;
 		animation: tsl-label-pop 0.18s ease;
 	}
@@ -86,16 +86,16 @@
 		@apply from-gray-700 via-gray-700 to-gray-700;
 	}
 	.dark .time-slider-range {
-		@apply from-blue-400 to-blue-300;
+		@apply from-primary-500 to-primary-400;
 	}
 	.dark .time-slider-handle {
-		@apply bg-gray-100 border-blue-400 text-blue-600;
+		@apply bg-gray-100 border-primary-500 text-primary-700;
 	}
 	.dark .time-slider-handle:hover {
 		@apply bg-white;
 	}
 	.dark .time-slider-label {
-		@apply bg-blue-500;
+		@apply bg-primary-500;
 	}
 	.dark .time-slider-ticks span {
 		@apply text-gray-300;
@@ -112,13 +112,13 @@
 		@apply px-3 py-1 text-xs font-medium rounded border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition;
 	}
 	.time-slider-mode button.active {
-		@apply bg-blue-600 border-blue-600 text-white shadow;
+		@apply bg-primary-500 border-primary-600 text-primary-900 shadow;
 	}
 	.dark .time-slider-mode button {
 		@apply border-gray-600 bg-gray-700 text-gray-200 hover:bg-gray-600;
 	}
 	.dark .time-slider-mode button.active {
-		@apply bg-blue-500 border-blue-500 text-white;
+		@apply bg-primary-500 border-primary-500 text-white;
 	}
 
 	/* Animation */
