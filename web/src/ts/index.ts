@@ -15,7 +15,7 @@ let updater: AdjustableUpdater | null = null;
 getGL().then((mapgl) => {
     const map = new mapgl.Map("map", {
 		center: [71.4272, 51.1655],
-		zoom: 8,
+		zoom: 14,
 		// Demo-key here, use some backend proxy in prod
 		key: "96f35a47-3653-4109-ac5b-1365fe492cc9",
 	});
@@ -35,8 +35,8 @@ getGL().then((mapgl) => {
 			const request = makeRequest(
 				topLeft,
 				bottomRight,
-				24,
-				14,
+				96, 
+				54,
 				new Date(Date.now() - 24 * 60 * 60 * 1000),
 				new Date()
 			);
