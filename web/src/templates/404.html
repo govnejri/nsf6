@@ -1,16 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
-    <title>NSF6</title>
-    <link rel="stylesheet" href="/static/stylesheet.css">
-</head>
-<body>
-    <div id="app">
-        Found emes
-    </div>
-    <script src="/static/js/hello-world.js" type="module"></script>
-</body>
-</html>
+{% extends "base.html" %}
+{% block content%}
+    <h1>404 - Page Not Found</h1>
+    <p>Мы ничего не нашли.</p>
+    <a href="/">На лэндинг</a>
+{% endblock %}
