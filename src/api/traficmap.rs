@@ -21,7 +21,7 @@ pub struct MapRectangle {
 }
 
 #[derive(Debug, Deserialize, Serialize, ToSchema)]
-pub struct HeatmapRequest {
+pub struct TraficmapRequest {
     pub area: MapRectangle,
     pub time_start: DateTime<chrono::Utc>,
     pub time_end: DateTime<chrono::Utc>,
@@ -31,7 +31,7 @@ pub struct HeatmapRequest {
 
 // Flat query parameters for GET requests (external names in camelCase)
 #[derive(Debug, Deserialize, Serialize, ToSchema)]
-pub struct HeatmapQueryParams {
+pub struct TraficmapQueryParams {
     /// Top-left latitude
     #[serde(rename = "tlLat")]
     pub tl_lat: f64,
@@ -55,7 +55,7 @@ pub struct HeatmapQueryParams {
 }
 
 #[derive(Debug, Deserialize, Serialize, ToSchema, Clone)]
-pub struct HeatTile {
+pub struct TraficTile {
     pub count: usize,
     #[serde(rename = "neighborCount")]
     pub neighbor_count: usize,
@@ -66,19 +66,19 @@ pub struct HeatTile {
 }
 
 #[derive(Debug, Deserialize, Serialize, ToSchema, Clone)]
-pub struct HeatmapData {
-    pub data: Vec<HeatTile>,
+pub struct TraficmapData {
+    pub data: Vec<TraficTile>,
 }
 
 #[derive(Debug, Deserialize, Serialize, ToSchema, Clone)]
-pub struct HeatmapResponse {
-    pub heatmap: HeatmapData,
+pub struct TraficmapResponse {
+    pub traficmap: TraficmapData,
 }
 
 #[utoipa::path(
     get,
-    path = "/api/heatmap",
-    tag = "Heatmap",
+    path = "/api/traficmap",
+    tag = "Traficmap",
     params(
     ("tlLat" = f64, Query, description = "Top-left latitude"),
     ("tlLong" = f64, Query, description = "Top-left longitude"),
@@ -90,19 +90,19 @@ pub struct HeatmapResponse {
     ("tileHeight" = f64, Query, description = "Height of each tile in degrees"),
     ),
     responses(
-        (status = 200, description = "Heatmap data", body = HeatmapResponse),
+        (status = 200, description = "Traficmap data", body = TraficmapResponse),
         (status = 500, description = "Server Vzorvalsya"),
     )
 )]
 
 #[get("")]
-pub async fn get_heatmap(
+pub async fn get_traficmap(
     db: web::Data<DatabaseConnection>,
-    qp: web::Query<HeatmapQueryParams>,
+    qp: web::Query<TraficmapQueryParams>,
 ) -> HttpResponse {
     let started = Instant::now();
     debug!(
-        "Heatmap request: tl=({}, {}), br=({}, {}), time=[{}..{}], tile=({}, {})",
+        "Traficmap request: tl=({}, {}), br=({}, {}), time=[{}..{}], tile=({}, {})",
         qp.tl_lat, qp.tl_long, qp.br_lat, qp.br_long, qp.time_start, qp.time_end, qp.tile_width, qp.tile_height
     );
     // Basic validation
@@ -123,8 +123,8 @@ pub async fn get_heatmap(
 
     // Early return if degenerate
     if rows == 0 || cols == 0 {
-        let resp = HeatmapResponse { heatmap: HeatmapData { data: vec![] } };
-    info!("Heatmap degenerate area (rows=0 or cols=0), returning empty. took={:?}", started.elapsed());
+        let resp = TraficmapResponse { traficmap: TraficmapData { data: vec![] } };
+    info!("Traficmap degenerate area (rows=0 or cols=0), returning empty. took={:?}", started.elapsed());
         return HttpResponse::Ok().json(resp);
     }
 
@@ -138,26 +138,25 @@ pub async fn get_heatmap(
         .all(db.get_ref()).await {
         Ok(p) => p,
         Err(e) => {
-            error!("Heatmap query failed: {}", e);
+            error!("Traficmap query failed: {}", e);
             return HttpResponse::InternalServerError().finish();
         }
     };
 
-    // Filter to keep only the first point for each randomized_id
+    // Use all points without deduplication
     let total_points_count = all_points.len();
-    let mut seen_trips = std::collections::HashSet::new();
-    let points: Vec<_> = all_points.into_iter()
-        .filter(|point| seen_trips.insert(point.randomized_id))
-        .collect();
-    debug!("Heatmap DB returned {} total points, filtered to {} first points per trip in {:?}", 
-           total_points_count, points.len(), started.elapsed());
+    debug!(
+        "Traficmap DB returned {} points in {:?}",
+        total_points_count,
+        started.elapsed()
+    );
 
     // Bucket points into tiles
     let mut counts = vec![0usize; rows * cols];
     let inv_h = 1.0 / qp.tile_height;
     let inv_w = 1.0 / qp.tile_width;
 
-    for p in points {
+    for p in all_points {
         // Compute indices; clamp to [0, rows-1] / [0, cols-1]
         let mut r = ((p.lat - lat_min) * inv_h).floor() as isize;
         let mut c = ((p.lon - lon_min) * inv_w).floor() as isize;
@@ -204,7 +203,7 @@ pub async fn get_heatmap(
 
             // Include tiles with points or with non-zero neighbors
             if count > 0 || neighbor_count > 0 {
-                data.push(HeatTile {
+                data.push(TraficTile {
                     count,
                     neighbor_count,
                     top_left: MapPoint { lat: tile_lat_min, long: tile_lon_min },
@@ -214,17 +213,17 @@ pub async fn get_heatmap(
         }
     }
 
-    let resp = HeatmapResponse { heatmap: HeatmapData { data } };
+    let resp = TraficmapResponse { traficmap: TraficmapData { data } };
     info!(
-        "Heatmap response: tiles={} (non-zero only) from grid={}x{} points_count={} took={:?}",
-        resp.heatmap.data.len(), rows, cols, counts.iter().sum::<usize>(), started.elapsed()
+        "Traficmap response: tiles={} (non-zero only) from grid={}x{} points_count={} took={:?}",
+        resp.traficmap.data.len(), rows, cols, counts.iter().sum::<usize>(), started.elapsed()
     );
     HttpResponse::Ok().json(resp)
 }
 
 pub fn init_routes(cfg: &mut web::ServiceConfig) {
     cfg.service(
-        web::scope("/heatmap")
-            .service(get_heatmap)
+        web::scope("/traficmap")
+            .service(get_traficmap)
     );
 }
