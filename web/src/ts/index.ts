@@ -54,15 +54,19 @@ getGL().then((mapgl) => {
 				96,
 				54,
 				startHour,
-				endHour
+				endHour,
+				undefined,
+				undefined,
+				undefined,
+				($("#heatmap-type").val() as "heatmap" | "trafficmap" | "speedmap") || "heatmap"
 			);
 			getHeatmap(request).then((res) => {
 				if ("error" in res) {
 					console.error("Heatmap error:", res.error);
 					return;
 				}
-				if (res.heatmap) {
-					renderHeatmap(mapgl, map, res.heatmap);
+				if (Object.entries(res).length >= 1) {
+					renderHeatmap(mapgl, map, Object.values(res)[0]);
 				}
 			});
 		}, getUpdateInterval() / 1000);

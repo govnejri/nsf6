@@ -9,6 +9,7 @@ export type HeatmapRequest = {
 	daysOfWeek?: number[]; // 0=Mon ... 6=Sun, optional
 	dateStart?: string; // 2023-10-01
 	dateEnd?: string; // 2023-10-31
+	heatmapType: 'heatmap' | 'trafficmap' | 'speedmap';
 };
 
 
@@ -17,9 +18,7 @@ export type HeatmapRectangle = {
 	neighborCount: number;
 } & MapRectangle;
 
-export type HeatmapResponse = {
-    heatmap: Heatmap | null;
-};
+export type HeatmapResponse = Record<string, Heatmap>;
 
 export type Heatmap = {
 	data: HeatmapRectangle[];

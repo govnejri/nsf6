@@ -22,7 +22,7 @@ export default async function getHeatmap(
 	if (req.dateEnd) params.set("dateEnd", req.dateEnd);
 	if (req.daysOfWeek && req.daysOfWeek.length > 0)
 		params.set("daysOfWeek", req.daysOfWeek.join(","));
-	const response = await fetch(`/api/heatmap/?` + params.toString(), {
+	const response = await fetch(`/api/${req.heatmapType}/?` + params.toString(), {
 		method: "GET",
 	});
 	if (!response.ok) {
@@ -41,7 +41,8 @@ export function makeRequest(
 	timeEndHour?: number,
 	dateStart?: Date,
 	dateEnd?: Date,
-	daysOfWeek?: number[]
+	daysOfWeek?: number[],
+	heatmapType: 'heatmap' | 'trafficmap' | 'speedmap' = 'heatmap'
 ): HeatmapRequest {
 	// Make sure topLeft and bottomRight are correctly oriented
 	if (topLeft.lat < bottomRight.lat) {
@@ -61,6 +62,7 @@ export function makeRequest(
 		},
 		tileWidth,
 		tileHeight,
+		heatmapType,
 	};
 
 	if (typeof timeStartHour === "number") {
