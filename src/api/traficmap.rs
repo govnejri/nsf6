@@ -282,7 +282,7 @@ fn parse_time_of_day(input: &str) -> Result<NaiveTime, String> {
 
 pub fn init_routes(cfg: &mut web::ServiceConfig) {
     cfg.service(
-        web::scope("/traficmap")
+        web::scope("/trafficmap")
             .service(get_traficmap)
     );
 }
