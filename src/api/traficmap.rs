@@ -145,7 +145,7 @@ pub async fn get_traficmap(
     // First, get all points within bounds and optional time range, ordered by timestamp
     let mut query = Points::find()
         .filter(points::Column::Lat.between(lat_min, lat_max))
-        .filter(points::Column::lng.between(lon_min, lon_max));
+        .filter(points::Column::Lng.between(lon_min, lon_max));
     if let Some(ts_start) = qp.date_start { query = query.filter(points::Column::Timestamp.gte(ts_start)); }
     if let Some(ts_end) = qp.date_end { query = query.filter(points::Column::Timestamp.lte(ts_end)); }
     let mut all_points = match query
