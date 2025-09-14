@@ -1,12 +1,16 @@
 import { MapRectangle } from "./common";
 
 export type HeatmapRequest = {
-	area: MapRectangle;
-	timeStart: Date;
-	timeEnd: Date;
-	tileWidth: number;
+	area: MapRectangle; // degrees
+	tileWidth: number; // degrees
 	tileHeight: number;
+	timeStart?: string; // 11:00
+	timeEnd?: string; // 15:00
+	daysOfWeek?: number[]; // 0=Mon ... 6=Sun, optional
+	dateStart?: string; // 2023-10-01
+	dateEnd?: string; // 2023-10-31
 };
+
 
 export type HeatmapRectangle = {
 	count: number;

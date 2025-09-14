@@ -9,22 +9,22 @@ import {
 export default async function getHeatmap(
 	req: HeatmapRequest
 ): Promise<HeatmapResponse | { error: string }> {
-	const response = await fetch(
-		`/api/heatmap/?` +
-			new URLSearchParams({
-				tlLat: req.area.topLeft.lat.toString(),
-				tlLong: req.area.topLeft.long.toString(),
-				brLat: req.area.bottomRight.lat.toString(),
-				brLong: req.area.bottomRight.long.toString(),
-				tileWidth: req.tileWidth.toString(),
-				tileHeight: req.tileHeight.toString(),
-				timeStart: req.timeStart.toISOString(),
-				timeEnd: req.timeEnd.toISOString(),
-			}),
-		{
-			method: "GET",
-		}
-	);
+	const params = new URLSearchParams();
+	params.set("tlLat", req.area.topLeft.lat.toString());
+	params.set("tlLong", req.area.topLeft.long.toString());
+	params.set("brLat", req.area.bottomRight.lat.toString());
+	params.set("brLong", req.area.bottomRight.long.toString());
+	params.set("tileWidth", req.tileWidth.toString());
+	params.set("tileHeight", req.tileHeight.toString());
+	if (req.timeStart) params.set("timeStart", req.timeStart);
+	if (req.timeEnd) params.set("timeEnd", req.timeEnd);
+	if (req.dateStart) params.set("dateStart", req.dateStart);
+	if (req.dateEnd) params.set("dateEnd", req.dateEnd);
+	if (req.daysOfWeek && req.daysOfWeek.length > 0)
+		params.set("daysOfWeek", req.daysOfWeek.join(","));
+	const response = await fetch(`/api/heatmap/?` + params.toString(), {
+		method: "GET",
+	});
 	if (!response.ok) {
 		return { error: "Failed to fetch heatmap" };
 	}
@@ -37,8 +37,11 @@ export function makeRequest(
 	bottomRight: MapPoint,
 	countX: number,
 	countY: number,
-	timeStart: Date,
-	timeEnd: Date
+	timeStartHour?: number,
+	timeEndHour?: number,
+	dateStart?: Date,
+	dateEnd?: Date,
+	daysOfWeek?: number[]
 ): HeatmapRequest {
 
 	// Make sure topLeft and bottomRight are correctly oriented
@@ -51,16 +54,33 @@ export function makeRequest(
 
 	const tileWidth = (bottomRight.long - topLeft.long) / countX;
 	const tileHeight = (topLeft.lat - bottomRight.lat) / countY;
-	return {
+
+	const request: HeatmapRequest = {
 		area: {
 			topLeft,
 			bottomRight,
 		},
-		timeStart,
-		timeEnd,
 		tileWidth,
 		tileHeight,
 	};
+
+	if (typeof timeStartHour === "number") {
+		request.timeStart = `${timeStartHour.toString().padStart(2, "0")}:00`;
+	}
+	if (typeof timeEndHour === "number") {
+		request.timeEnd = `${timeEndHour.toString().padStart(2, "0")}:00`;
+	}
+	if (dateStart instanceof Date) {
+		request.dateStart = dateStart.toISOString().slice(0, 10);
+	}
+	if (dateEnd instanceof Date) {
+		request.dateEnd = dateEnd.toISOString().slice(0, 10);
+	}
+	if (daysOfWeek && daysOfWeek.length > 0) {
+		request.daysOfWeek = daysOfWeek;
+	}
+
+	return request;
 }
 
 export function getMockHeatmap(req: HeatmapRequest): Promise<HeatmapResponse> {

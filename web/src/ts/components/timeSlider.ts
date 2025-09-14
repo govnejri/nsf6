@@ -6,6 +6,8 @@ export type TimeSliderOptions = {
 	onChange: (range: { left: number; right: number }) => void; // Callback when the slider range changes
 	initialLeft?: number; // optional initial left index
 	initialRight?: number; // optional initial right index
+	showModeSelector?: boolean; // optional mode selector UI
+	modeSelectorLabels?: { hours: string; "days-of-week": string }; // custom labels for mode selector
 };
 
 type TimeSliderState = {
@@ -27,6 +29,7 @@ export class TimeSlider {
 	private label: JQuery<HTMLElement>;
 	private ticks: JQuery<HTMLElement>;
 	private resizeHandler: () => void;
+	private modeSwitch?: JQuery<HTMLElement>;
 
 	private static DAY_LABELS_RU = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
 
@@ -53,6 +56,10 @@ export class TimeSlider {
 		this.container.addClass(
 			this.options.type === "hours" ? "mode-hours" : "mode-days"
 		);
+
+		if (this.options.showModeSelector !== false) {
+			this.buildModeSelector();
+		}
 
 		this.slider = $(
 			'<div class="time-slider" role="group" aria-label="Диапазон времени"></div>'
@@ -98,6 +105,36 @@ export class TimeSlider {
 		const max = this.state.steps - 1;
 		this.state.leftValue = this.clamp(Math.min(left, right), 0, max);
 		this.state.rightValue = this.clamp(Math.max(left, right), 0, max);
+		this.updateUI(true);
+	}
+
+	setType(newType: "hours" | "days-of-week") {
+		if (newType === this.options.type) return;
+		const oldSteps = this.state.steps;
+		const oldLeft = this.state.leftValue;
+		const oldRight = this.state.rightValue;
+		const leftRatio = oldLeft / (oldSteps - 1);
+		const rightRatio = oldRight / (oldSteps - 1);
+		this.options.type = newType;
+		this.state.steps = newType === "hours" ? 24 : 7;
+		this.state.leftValue = Math.round(leftRatio * (this.state.steps - 1));
+		this.state.rightValue = Math.round(rightRatio * (this.state.steps - 1));
+		// Safety clamp
+		this.state.leftValue = this.clamp(
+			this.state.leftValue,
+			0,
+			this.state.steps - 1
+		);
+		this.state.rightValue = this.clamp(
+			this.state.rightValue,
+			this.state.leftValue,
+			this.state.steps - 1
+		);
+		// Update container mode classes
+		this.container
+			.removeClass("mode-hours mode-days")
+			.addClass(newType === "hours" ? "mode-hours" : "mode-days");
+		this.renderTicks();
 		this.updateUI(true);
 	}
 
@@ -180,6 +217,36 @@ export class TimeSlider {
 
 		this.leftHandle.on("keydown", (e) => onKey(e, "left"));
 		this.rightHandle.on("keydown", (e) => onKey(e, "right"));
+	}
+
+	private buildModeSelector() {
+		const labels = this.options.modeSelectorLabels || {
+			hours: "Часы",
+			"days-of-week": "Дни",
+		};
+		this.modeSwitch = $('<div class="time-slider-mode"></div>');
+		const btnHours = $(
+			'<button type="button" data-mode="hours"></button>'
+		).text(labels.hours);
+		const btnDays = $(
+			'<button type="button" data-mode="days-of-week"></button>'
+		).text(labels["days-of-week"]);
+		this.modeSwitch.append(btnHours, btnDays);
+		this.container.prepend(this.modeSwitch);
+		const updateActive = () => {
+			this.modeSwitch!.find("button").removeClass("active");
+			this.modeSwitch!.find(
+				`button[data-mode="${this.options.type}"]`
+			).addClass("active");
+		};
+		updateActive();
+		this.modeSwitch.on("click", "button", (e) => {
+			const mode = $(e.currentTarget).data("mode");
+			if (mode && mode !== this.options.type) {
+				this.setType(mode);
+				updateActive();
+			}
+		});
 	}
 
 	private onPointerMove(e: JQuery.TriggeredEvent) {
