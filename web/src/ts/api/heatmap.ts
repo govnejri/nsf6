@@ -123,6 +123,7 @@ export function getMockHeatmap(req: HeatmapRequest): Promise<HeatmapResponse> {
 				count: Math.floor(Math.random() * 100),
 				topLeft: { lat: topLat, long: leftLong },
 				bottomRight: { lat: bottomLat, long: rightLong },
+				neighborCount: 0,
 			});
 		}
 	}
