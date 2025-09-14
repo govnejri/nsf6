@@ -66,7 +66,7 @@ getGL().then((mapgl) => {
 					return;
 				}
 				if (Object.entries(res).length >= 1) {
-					renderHeatmap(mapgl, map, Object.values(res)[0]);
+					renderHeatmap(mapgl, map, Object.values(res)[0], $("#color-blind").is(":checked"));
 				}
 			});
 		}, getUpdateInterval() / 1000);

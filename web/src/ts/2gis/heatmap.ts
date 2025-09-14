@@ -9,7 +9,8 @@ const polygonRemoveCallbacks: (() => void)[] = [];
 export function renderHeatmap(
 	mapgl: typeof gis,
 	map: gis.Map,
-	heatmap: Heatmap
+	heatmap: Heatmap,
+	colorblind: boolean
 ) {
 	// Kill old heatmap polygons
 	polygonRemoveCallbacks.forEach((cb) => cb());
@@ -32,7 +33,8 @@ export function renderHeatmap(
 			],
 			color: getColorForCount(
 				rect.count + rect.neighborCount * 0.125,
-				maxCount
+				maxCount,
+				colorblind
 			),
 			strokeWidth: 0,
 			zIndex: 1,
@@ -47,11 +49,11 @@ export function renderHeatmap(
 	});
 }
 
-function getColorForCount(count: number, maxCount: number): string {
+function getColorForCount(count: number, maxCount: number, colorblind: boolean): string {
 	if (count <= 0.2) return "rgba(0,0,0,0)";
 	const ratio = count / maxCount;
-	const leftHue = 160;
-	const rightHue = 0;
+	const leftHue = colorblind ? 260 : 160;
+	const rightHue = colorblind ? 230 : 0;
 	const hue = leftHue + (rightHue - leftHue) * ratio;
-	return `hsl(${Math.floor(hue)}, 100%, 60%, ${ratio * 0.5 + 0.1})`;
+	return `hsl(${Math.floor(hue)}, 100%, ${colorblind ? Math.floor(ratio * 50 + 20) : 60}%, ${ratio * 0.5 + 0.2})`;
 }
