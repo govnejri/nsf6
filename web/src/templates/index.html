@@ -2,18 +2,18 @@
 {% block content %}
     <div class="relative z-10 bg-transparent">
         <div class="card w-fit">
-            <h1>Hello, NSF6!</h1>
+            <h1>NotSoFar</h1>
             <label>
-                Update interval (ms):
+                Интервал обновлений (мс):
                 <input id="update-interval" type="range" min="100" max="5000" value="1000" step="100">
                 <span id="update-interval-value">1000</span>
             </label>
             <label>
-                Heatmap Type:
+                Тип карты:
                 <select id="heatmap-type">
-                    <option value="heatmap" selected>Heatmap</option>
-                    <option value="trafficmap">Traffic Map</option>
-                    <option value="speedmap">Speed Map</option>
+                    <option value="heatmap" selected>Карта спроса</option>
+                    <option value="trafficmap">Карта трафика</option>
+                    <option value="speedmap">Карта скорости</option>
                 </select>
             </label>
         </div>

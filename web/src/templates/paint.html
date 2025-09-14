@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
     <div class="card fixed bottom-4 left-4 z-10 flex flex-col gap-4">
-        <div><label>Start datetime: <input id="start-datetime" type="datetime-local"></label></div>
-        <div><label>End datetime: <input id="end-datetime" type="datetime-local"></label></div>
+        <div><label>Начальная дата и время: <input id="start-datetime" type="datetime-local"></label></div>
+        <div><label>Конечная дата и время: <input id="end-datetime" type="datetime-local"></label></div>
         <div class="w-full flex *:flex-1 gap-2">
-            <button id="send" class="primary">Send to server</button>
-            <button id="clear" class="danger">Clear All</button>
+            <button id="send" class="primary">Отправить на сервер</button>
+            <button id="clear" class="danger">Очистить всё</button>
         </div>
     </div>
     <div id="map" class="map"> </div>
