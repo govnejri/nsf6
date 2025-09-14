@@ -16,7 +16,7 @@ export function renderHeatmap(
     polygonRemoveCallbacks.forEach((cb) => cb());
 	polygonRemoveCallbacks.length = 0;
 
-	const maxCount = Math.max(...heatmap.data.map((rect) => rect.count+rect.neighborCount), 1);
+	const maxCount = Math.max(...heatmap.data.map((rect) => rect.count+rect.neighborCount*0.125), 1);
 	heatmap.data.forEach((rect, idx) => {
 		const polygon = new mapgl.Polygon(map, {
 			coordinates: [
@@ -28,20 +28,23 @@ export function renderHeatmap(
 					[rect.topLeft.long, rect.topLeft.lat],
 				],
 			],
-			color: getColorForCount(rect.count + rect.neighborCount, maxCount),
+			color: getColorForCount(rect.count + rect.neighborCount*0.125, maxCount),
 			strokeWidth: 0,
 			zIndex: 1,
-            userData: { heatmapRemove: true, idx }
+			interactive: true,
+		});
+		polygon.on('click', () => {
+			alert(`Count: ${rect.count}\nNeighbor count: ${rect.neighborCount}`);
 		});
         polygonRemoveCallbacks.push(() => polygon.destroy());
 	});
 }
 
 function getColorForCount(count: number, maxCount: number): string {
-	if (maxCount <= 0) return "rgba(0,0,0,0)";
+	if (count <= 0.2) return "rgba(0,0,0,0)";
 	const ratio = count / maxCount;
     const leftHue = 160;
     const rightHue = 0;
     const hue = leftHue + (rightHue - leftHue) * ratio;
-    return `hsl(${Math.floor(hue)}, 100%, 50%, ${ratio * 0.5})`;
+    return `hsl(${Math.floor(hue)}, 100%, 60%, ${ratio * 0.5 + 0.1})`;
 }
