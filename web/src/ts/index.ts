@@ -4,6 +4,7 @@ import { renderHeatmap } from "./2gis/heatmap";
 import getHeatmap, { getMockHeatmap, makeRequest } from "./api/heatmap";
 import { MapPoint } from "./types/common";
 import { AdjustableUpdater } from "./helpers/adjustableUpdater";
+import { TimeSlider } from "./components/timeSlider";
 
 
 function getUpdateInterval(): number {
@@ -11,6 +12,12 @@ function getUpdateInterval(): number {
 }
 
 let updater: AdjustableUpdater | null = null;
+
+const timeSlider = new TimeSlider({
+	type: 'hours',
+	container: '#time-slider',
+	onChange: (range) => {}
+});
 
 getGL().then((mapgl) => {
     const map = new mapgl.Map("map", {
@@ -32,13 +39,21 @@ getGL().then((mapgl) => {
 					long: bounds.southWest[0],
 					lat: bounds.southWest[1],
 				};
+			const {left: leftValue, right: rightValue} = timeSlider.getRange(); // 0-100 (%)
+			// Map to hours of today
+			const now = new Date();
+			const startHour = Math.floor((leftValue / 100) * 24);
+			const endHour = Math.ceil((rightValue / 100) * 24);
+			const startTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), startHour, 0, 0);
+			const endTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), endHour, 0, 0);
+
 			const request = makeRequest(
 				topLeft,
 				bottomRight,
 				96, 
 				54,
-				new Date(Date.now() - 24 * 60 * 60 * 1000),
-				new Date()
+				startTime,
+				endTime
 			);
 			getHeatmap(request).then((res) => {
 				if ('error' in res) {
