@@ -11,9 +11,9 @@ export default async function getHeatmap(
 ): Promise<HeatmapResponse | { error: string }> {
 	const params = new URLSearchParams();
 	params.set("lat1", req.area.topLeft.lat.toString());
-	params.set("lon1", req.area.topLeft.long.toString());
+	params.set("lng1", req.area.topLeft.lng.toString());
 	params.set("lat2", req.area.bottomRight.lat.toString());
-	params.set("lon2", req.area.bottomRight.long.toString());
+	params.set("lng2", req.area.bottomRight.lng.toString());
 	params.set("tileWidth", req.tileWidth.toString());
 	params.set("tileHeight", req.tileHeight.toString());
 	if (req.timeStart) params.set("timeStart", req.timeStart);
@@ -43,16 +43,15 @@ export function makeRequest(
 	dateEnd?: Date,
 	daysOfWeek?: number[]
 ): HeatmapRequest {
-
 	// Make sure topLeft and bottomRight are correctly oriented
 	if (topLeft.lat < bottomRight.lat) {
 		[topLeft.lat, bottomRight.lat] = [bottomRight.lat, topLeft.lat];
 	}
-	if (topLeft.long > bottomRight.long) {
-		[topLeft.long, bottomRight.long] = [bottomRight.long, topLeft.long];
+	if (topLeft.lng > bottomRight.lng) {
+		[topLeft.lng, bottomRight.lng] = [bottomRight.lng, topLeft.lng];
 	}
 
-	const tileWidth = (bottomRight.long - topLeft.long) / countX;
+	const tileWidth = (bottomRight.lng - topLeft.lng) / countX;
 	const tileHeight = (topLeft.lat - bottomRight.lat) / countY;
 
 	const request: HeatmapRequest = {
@@ -100,10 +99,10 @@ export function getMockHeatmap(req: HeatmapRequest): Promise<HeatmapResponse> {
 	const longStep = tileWidth; // usually positive, but handle generically
 
 	const alignedLatStart = alignStart(area.topLeft.lat, latStep);
-	const alignedLongStart = alignStart(area.topLeft.long, longStep);
+	const alignedLongStart = alignStart(area.topLeft.lng, longStep);
 
 	const latEnd = area.bottomRight.lat;
-	const longEnd = area.bottomRight.long;
+	const longEnd = area.bottomRight.lng;
 
 	const latContinue = (lat: number) =>
 		latStep > 0 ? lat < latEnd : lat > latEnd;
@@ -133,16 +132,15 @@ export function getMockHeatmap(req: HeatmapRequest): Promise<HeatmapResponse> {
 			)
 				continue;
 			if (
-				rightLong <
-					Math.min(area.topLeft.long, area.bottomRight.long) ||
-				leftLong > Math.max(area.topLeft.long, area.bottomRight.long)
+				rightLong < Math.min(area.topLeft.lng, area.bottomRight.lng) ||
+				leftLong > Math.max(area.topLeft.lng, area.bottomRight.lng)
 			)
 				continue;
 
 			data.push({
 				count: Math.floor(Math.random() * 100),
-				topLeft: { lat: topLat, long: leftLong },
-				bottomRight: { lat: bottomLat, long: rightLong },
+				topLeft: { lat: topLat, lng: leftLong },
+				bottomRight: { lat: bottomLat, lng: rightLong },
 				neighborCount: 0,
 			});
 		}

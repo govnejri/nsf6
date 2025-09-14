@@ -6,12 +6,15 @@
 import getGL from "./2gis/get";
 import $ from "jquery";
 import astanaMap from "./helpers/astanaMap";
+import { makeRequest, sendPoints } from "./api/sendPoints";
 
 let isPainting = false;
 let canPaint = true;
 
 getGL().then((mapgl) => {
     const map = astanaMap(mapgl);
+    const coordinates: [number, number][] = [];
+    let destroyFunc: (() => void) = () => {};
 
     map.on("styleload", () => {
         map.on('mousedown', (e) => {
@@ -21,8 +24,6 @@ getGL().then((mapgl) => {
         $(document).on('mouseup', () => {
             isPainting = false;
         });
-        const coordinates: [number, number][] = [];
-        let destroyFunc: (() => void) = () => {};
         map.on('mousemove', (e) => {
             if (isPainting && canPaint) {
                 destroyFunc();
@@ -40,4 +41,30 @@ getGL().then((mapgl) => {
             canPaint = true;
         }, 20);
     });
+
+    $('#clear').on('click', () => {
+        destroyFunc();
+        coordinates.length = 0;
+    })
+    $('#send').on('click', () => {
+        if ($('#start-datetime').val() === '' || $('#end-datetime').val() === '') {
+            alert('Please select start and end datetime');
+            return;
+        }
+        if (coordinates.length < 2) {
+            alert('Please draw a route with at least 2 points');
+            return;
+        }
+        sendPoints(makeRequest(coordinates.map(c => ({ long: c[0], lat: c[1] })), new Date($('#start-datetime').val() as string), new Date($('#end-datetime').val() as string))).then(res => {
+            if (res.success) {
+                alert('Points sent successfully');
+                destroyFunc();
+                coordinates.length = 0;
+            } else {
+                alert('Error sending points: ' + res.error);
+            }
+        });
+    });
+
+
 });

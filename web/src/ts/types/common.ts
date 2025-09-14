@@ -1,6 +1,6 @@
 export type MapPoint = {
 	lat: number;
-	long: number;
+	lng: number;
 };
 
 export type MapRectangle = {

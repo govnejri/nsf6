@@ -27,11 +27,11 @@ getGL().then((mapgl) => {
 		updater = new AdjustableUpdater(async () => {
 			const bounds = map.getBounds();
 			const topLeft: MapPoint = {
-					long: bounds.northEast[0],
+					lng: bounds.northEast[0],
 					lat: bounds.northEast[1],
 				},
 				bottomRight: MapPoint = {
-					long: bounds.southWest[0],
+					lng: bounds.southWest[0],
 					lat: bounds.southWest[1],
 				};
 			const { left: leftValue, right: rightValue } =
