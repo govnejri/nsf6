@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use log::{info, error};
 use std::time::Instant;
+use chrono::{DateTime, Utc};
 
 #[derive(Debug, Deserialize, Serialize, ToSchema)]
 pub struct NewPoint {
@@ -13,6 +14,8 @@ pub struct NewPoint {
     pub alt: f64,
     pub spd: f64,
     pub azm: f64,
+    /// Optional timestamp in RFC3339/ISO8601 with timezone, e.g. "2025-09-14T12:34:56+06:00"
+    pub timestamp: Option<DateTime<Utc>>,
 }
 
 #[derive(Debug, Deserialize, Serialize, ToSchema)]
@@ -46,14 +49,23 @@ pub async fn push_points (
 
     let models: Vec<crate::database::model::points::ActiveModel> = points
         .into_iter()
-        .map(|point| crate::database::model::points::ActiveModel {
-            randomized_id: Set(point.randomized_id),
-            lat: Set(point.lat),
-            lon: Set(point.lon),
-            alt: Set(point.alt),
-            spd: Set(point.spd),
-            azm: Set(point.azm),
-            ..Default::default()
+        .map(|point| {
+            let mut model = crate::database::model::points::ActiveModel {
+                randomized_id: Set(point.randomized_id),
+                lat: Set(point.lat),
+                lon: Set(point.lon),
+                alt: Set(point.alt),
+                spd: Set(point.spd),
+                azm: Set(point.azm),
+                ..Default::default()
+            };
+
+            // Only set timestamp if provided; otherwise, leave NotSet to use DB default
+            if let Some(ts) = point.timestamp {
+                model.timestamp = Set(Some(ts));
+            }
+
+            model
         })
         .collect();
 
