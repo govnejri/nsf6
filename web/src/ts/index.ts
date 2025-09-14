@@ -16,12 +16,12 @@ let updater: AdjustableUpdater | null = null;
 const timeSlider = new TimeSlider({
 	type: "hours",
 	container: "#time-slider",
-	showModeSelector: true,
+	showModeSelector: false,
 	onChange: (range) => {},
 });
 
 getGL().then((mapgl) => {
-	const map = astanaMap(mapgl);
+	const map = astanaMap(mapgl, false);
 
 	map.on("styleload", () => {
 		updater = new AdjustableUpdater(async () => {

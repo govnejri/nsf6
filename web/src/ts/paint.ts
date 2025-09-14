@@ -12,7 +12,7 @@ let isPainting = false;
 let canPaint = true;
 
 getGL().then((mapgl) => {
-    const map = astanaMap(mapgl);
+    const map = astanaMap(mapgl,true);
     const coordinates: [number, number][] = [];
     let destroyFunc: (() => void) = () => {};
 
