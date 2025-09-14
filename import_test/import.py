@@ -69,7 +69,7 @@ def _gen_random_id() -> int:
 class Point:
 	randomized_id: int
 	lat: float
-	lon: float
+	lng: float
 	alt: float = 0.0
 	spd: float = 0.0
 	azm: float = 0.0
@@ -78,7 +78,7 @@ class Point:
 		return {
 			"randomized_id": int(self.randomized_id),
 			"lat": float(self.lat),
-			"lon": float(self.lon),
+			"lng": float(self.lng),
 			"alt": float(self.alt),
 			"spd": float(self.spd),
 			"azm": float(self.azm),
@@ -216,7 +216,7 @@ def row_to_point(row: Dict[str, object]) -> Optional[Point]:
 	except Exception:
 		rid_int = _gen_random_id()
 
-	return Point(randomized_id=rid_int, lat=lat, lon=lng, alt=alt, spd=spd, azm=azm)
+	return Point(randomized_id=rid_int, lat=lat, lng=lng, alt=alt, spd=spd, azm=azm)
 
 
 # --- Reservoir sampling ------------------------------------------------------
