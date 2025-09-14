@@ -10,6 +10,7 @@ export type HeatmapRequest = {
 
 export type HeatmapRectangle = {
 	count: number;
+	neighborCount: number;
 } & MapRectangle;
 
 export type HeatmapResponse = {

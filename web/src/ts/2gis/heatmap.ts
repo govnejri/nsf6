@@ -16,7 +16,7 @@ export function renderHeatmap(
     polygonRemoveCallbacks.forEach((cb) => cb());
 	polygonRemoveCallbacks.length = 0;
 
-	const maxCount = Math.max(...heatmap.data.map((rect) => rect.count), 1);
+	const maxCount = Math.max(...heatmap.data.map((rect) => rect.count+rect.neighborCount), 1);
 	heatmap.data.forEach((rect, idx) => {
 		const polygon = new mapgl.Polygon(map, {
 			coordinates: [
@@ -28,7 +28,7 @@ export function renderHeatmap(
 					[rect.topLeft.long, rect.topLeft.lat],
 				],
 			],
-			color: getColorForCount(rect.count, maxCount),
+			color: getColorForCount(rect.count + rect.neighborCount, maxCount),
 			strokeWidth: 0,
 			zIndex: 1,
             userData: { heatmapRemove: true, idx }
