@@ -67,9 +67,9 @@ pub struct SpeedmapQueryParams {
 
 #[derive(Debug, Deserialize, Serialize, ToSchema, Clone)]
 pub struct SpeedTile {
-    pub count: usize,
+    pub count: f64,
     #[serde(rename = "neighborCount")]
-    pub neighbor_count: usize,
+    pub neighbor_count: f64,
     #[serde(rename = "topLeft")]
     pub top_left: MapPoint,
     #[serde(rename = "bottomRight")]
@@ -216,11 +216,11 @@ pub async fn get_speedmap(
             let tile_lon_min = lon_min + (c as f64) * qp.tile_width;
             let tile_lon_max = (tile_lon_min + qp.tile_width).min(lon_max);
 
-        let idx = r * cols + c;
-        let count = counts[idx];
+            let idx = r * cols + c;
+            let count = counts[idx] as f64;
 
         // Calculate neighbor count (8 surrounding cells)
-        let mut neighbor_points = 0usize;
+            let mut neighbor_points = 0usize;
             for dr in -1..=1 {
                 for dc in -1..=1 {
                     // Skip the center cell (the current tile itself)
@@ -238,10 +238,10 @@ pub async fn get_speedmap(
                     }
                 }
             }
-        let neighbor_count = neighbor_points;
+            let neighbor_count = neighbor_points as f64;
 
             // Include tiles with own data or neighbor data
-        if count > 0 || neighbor_count > 0 {
+            if count > 0.0 || neighbor_count > 0.0 {
                 data.push(SpeedTile {
             count,
             neighbor_count,
