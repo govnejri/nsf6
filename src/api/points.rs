@@ -11,7 +11,8 @@ pub struct NewPoint {
     pub randomized_id: i64,
     pub lat: f64,
     pub lon: f64,
-    pub alt: f64,
+    /// Optional altitude; defaults to 0 if not provided
+    pub alt: Option<f64>,
     pub spd: f64,
     pub azm: f64,
     /// Optional timestamp in RFC3339/ISO8601 with timezone, e.g. "2025-09-14T12:34:56+06:00"
@@ -54,7 +55,7 @@ pub async fn push_points (
                 randomized_id: Set(point.randomized_id),
                 lat: Set(point.lat),
                 lon: Set(point.lon),
-                alt: Set(point.alt),
+                alt: Set(point.alt.unwrap_or(0.0)),
                 spd: Set(point.spd),
                 azm: Set(point.azm),
                 ..Default::default()
