@@ -96,29 +96,29 @@ export function getMockHeatmap(req: HeatmapRequest): Promise<HeatmapResponse> {
 	};
 
 	const latStep = tileHeight; // may be negative
-	const longStep = tileWidth; // usually positive, but handle generically
+	const lngStep = tileWidth; // usually positive, but handle generically
 
 	const alignedLatStart = alignStart(area.topLeft.lat, latStep);
-	const alignedLongStart = alignStart(area.topLeft.lng, longStep);
+	const alignedLngStart = alignStart(area.topLeft.lng, lngStep);
 
 	const latEnd = area.bottomRight.lat;
-	const longEnd = area.bottomRight.lng;
+	const lngEnd = area.bottomRight.lng;
 
 	const latContinue = (lat: number) =>
 		latStep > 0 ? lat < latEnd : lat > latEnd;
-	const longContinue = (lng: number) =>
-		longStep > 0 ? lng < longEnd : lng > longEnd;
+	const lngContinue = (lng: number) =>
+		lngStep > 0 ? lng < lngEnd : lng > lngEnd;
 
 	const data: HeatmapRectangle[] = [];
 	for (let lat = alignedLatStart; latContinue(lat); lat += latStep) {
-		for (let lng = alignedLongStart; longContinue(lng); lng += longStep) {
-			// Compute rectangle bounds independent of step direction to maintain topLeft (max lat, min long) & bottomRight (min lat, max long)
+		for (let lng = alignedLngStart; lngContinue(lng); lng += lngStep) {
+			// Compute rectangle bounds independent of step direction to maintain topLeft (max lat, min lng) & bottomRight (min lat, max lng)
 			const nextLat = lat + latStep;
-			const nextLong = lng + longStep;
+			const nextLng = lng + lngStep;
 			const topLat = Math.max(lat, nextLat);
 			const bottomLat = Math.min(lat, nextLat);
-			const leftLong = Math.min(lng, nextLong);
-			const rightLong = Math.max(lng, nextLong);
+			const leftLng = Math.min(lng, nextLng);
+			const rightLng = Math.max(lng, nextLng);
 
 			// Skip tiles that fall completely outside requested area (in case alignment extended outward)
 			if (
@@ -132,15 +132,15 @@ export function getMockHeatmap(req: HeatmapRequest): Promise<HeatmapResponse> {
 			)
 				continue;
 			if (
-				rightLong < Math.min(area.topLeft.lng, area.bottomRight.lng) ||
-				leftLong > Math.max(area.topLeft.lng, area.bottomRight.lng)
+				rightLng < Math.min(area.topLeft.lng, area.bottomRight.lng) ||
+				leftLng > Math.max(area.topLeft.lng, area.bottomRight.lng)
 			)
 				continue;
 
 			data.push({
 				count: Math.floor(Math.random() * 100),
-				topLeft: { lat: topLat, lng: leftLong },
-				bottomRight: { lat: bottomLat, lng: rightLong },
+				topLeft: { lat: topLat, lng: leftLng },
+				bottomRight: { lat: bottomLat, lng: rightLng },
 				neighborCount: 0,
 			});
 		}

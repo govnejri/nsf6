@@ -55,7 +55,7 @@ getGL().then((mapgl) => {
             alert('Please draw a route with at least 2 points');
             return;
         }
-        sendPoints(makeRequest(coordinates.map(c => ({ long: c[0], lat: c[1] })), new Date($('#start-datetime').val() as string), new Date($('#end-datetime').val() as string))).then(res => {
+        sendPoints(makeRequest(coordinates.map(c => ({ lng: c[0], lat: c[1] })), new Date($('#start-datetime').val() as string), new Date($('#end-datetime').val() as string))).then(res => {
             if (res.success) {
                 alert('Points sent successfully');
                 destroyFunc();
