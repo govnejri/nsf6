@@ -43,5 +43,5 @@ function getColorForCount(count: number, maxCount: number): string {
     const leftHue = 160;
     const rightHue = 0;
     const hue = leftHue + (rightHue - leftHue) * ratio;
-    return `hsl(${Math.floor(hue)}, 100%, 50%, 0.5)`;
+    return `hsl(${Math.floor(hue)}, 100%, 50%, ${ratio * 0.5})`;
 }
