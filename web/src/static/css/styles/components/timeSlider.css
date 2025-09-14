@@ -53,7 +53,7 @@
 
 	/* Individual ticks */
 	.time-slider-ticks span {
-		@apply absolute -translate-x-1/2 text-[0px] lg:text-[10px] text-gray-500 font-medium leading-none;
+		@apply absolute text-[0px] lg:text-[10px] text-gray-500 font-medium leading-none;
 		white-space: nowrap;
 	}
 	.time-slider-ticks span::before {
