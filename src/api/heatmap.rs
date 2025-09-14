@@ -57,6 +57,8 @@ pub struct HeatmapQueryParams {
 #[derive(Debug, Deserialize, Serialize, ToSchema, Clone)]
 pub struct HeatTile {
     pub count: usize,
+    #[serde(rename = "neighborCount")]
+    pub neighbor_count: usize,
     #[serde(rename = "topLeft")]
     pub top_left: MapPoint,
     #[serde(rename = "bottomRight")]
@@ -182,8 +184,29 @@ pub async fn get_heatmap(
             let count = counts[r * cols + c];
             // Only add tiles with count > 0
             if count > 0 {
+                // Calculate neighbor count (8 surrounding cells)
+                let mut neighbor_count = 0;
+                for dr in -1..=1 {
+                    for dc in -1..=1 {
+                        // Skip the center cell (the current tile itself)
+                        if dr == 0 && dc == 0 {
+                            continue;
+                        }
+                        
+                        let nr = r as isize + dr;
+                        let nc = c as isize + dc;
+                        
+                        // Check bounds
+                        if nr >= 0 && nr < rows as isize && nc >= 0 && nc < cols as isize {
+                            let neighbor_idx = (nr as usize) * cols + (nc as usize);
+                            neighbor_count += counts[neighbor_idx];
+                        }
+                    }
+                }
+
                 data.push(HeatTile {
                     count,
+                    neighbor_count,
                     top_left: MapPoint { lat: tile_lat_min, long: tile_lon_min },
                     bottom_right: MapPoint { lat: tile_lat_max, long: tile_lon_max },
                 });
