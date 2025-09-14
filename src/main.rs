@@ -51,6 +51,7 @@ async fn main() -> std::io::Result<()> {
             )
             .route("/", web::get().to(routes::index))
             .route("/paint", web::get().to(routes::paint))
+            .route("/map", web::get().to(routes::map))
             .service(web::scope("/api")
                 .wrap(middleware::NormalizePath::trim())
                 .configure(points::init_routes)
