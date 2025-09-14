@@ -187,8 +187,9 @@ pub async fn get_speedmap(
     let total_points_count = all_points.len();
     debug!("Speedmap DB returned {} points after filters in {:?}", total_points_count, started.elapsed());
 
-    // Bucket points into tiles (counts only)
+    // Bucket points into tiles: keep counts and sum of speeds for averaging
     let mut counts = vec![0usize; rows * cols];
+    let mut speed_sums = vec![0f64; rows * cols];
     let inv_h = 1.0 / qp.tile_height;
     let inv_w = 1.0 / qp.tile_width;
 
@@ -202,8 +203,10 @@ pub async fn get_speedmap(
         if r as usize >= rows { r = rows as isize - 1; }
         if c as usize >= cols { c = cols as isize - 1; }
 
-        let idx = (r as usize) * cols + (c as usize);
+    let idx = (r as usize) * cols + (c as usize);
     counts[idx] += 1;
+    // accumulate speed for average velocity
+    speed_sums[idx] += p.spd;
     }
 
     // Build response tiles (row-major from lat_min/lon_min increasing)
@@ -217,9 +220,12 @@ pub async fn get_speedmap(
             let tile_lon_max = (tile_lon_min + qp.tile_width).min(lon_max);
 
             let idx = r * cols + c;
-            let count = counts[idx] as f64;
+            let point_count = counts[idx];
+            let sum = speed_sums[idx];
+            let avg_velocity = if point_count > 0 { sum / (point_count as f64) } else { 0.0 };
 
-        // Calculate neighbor count (8 surrounding cells)
+            // Calculate neighbor average velocity (8 surrounding cells)
+            let mut neighbor_sum = 0.0f64;
             let mut neighbor_points = 0usize;
             for dr in -1..=1 {
                 for dc in -1..=1 {
@@ -234,17 +240,19 @@ pub async fn get_speedmap(
                     // Check bounds
                     if nr >= 0 && nr < rows as isize && nc >= 0 && nc < cols as isize {
                         let neighbor_idx = (nr as usize) * cols + (nc as usize);
+                        neighbor_sum += speed_sums[neighbor_idx];
                         neighbor_points += counts[neighbor_idx];
                     }
                 }
             }
-            let neighbor_count = neighbor_points as f64;
+            let neighbor_avg_velocity = if neighbor_points > 0 { neighbor_sum / (neighbor_points as f64) } else { 0.0 };
 
             // Include tiles with own data or neighbor data
-            if count > 0.0 || neighbor_count > 0.0 {
+            if point_count > 0 || neighbor_points > 0 {
                 data.push(SpeedTile {
-            count,
-            neighbor_count,
+                    // naming requirement: return average velocities under 'count' fields
+                    count: avg_velocity,
+                    neighbor_count: neighbor_avg_velocity,
                     top_left: MapPoint { lat: tile_lat_min, lng: tile_lon_min },
                     bottom_right: MapPoint { lat: tile_lat_max, lng: tile_lon_max },
                 });
