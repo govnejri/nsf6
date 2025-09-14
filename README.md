@@ -21,6 +21,20 @@ NotSoFar - веб-приложение для анализа и визуализ
 - Frontend: 2Gis MapGL, TypeScript, jQuery, Tailwind CSS, PostCSS
 - Контейнеризация: Docker, Docker Compose
 
+
+## Команда
+- omga: Frontend, API, писал этот файл | [LinkedIn](https://www.linkedin.com/in/omgaxd/)
+- c0st1nus: Backend, БД | [LinkedIn](https://www.linkedin.com/in/konstantin-koshevoy-336608324/)
+- govnejri: ML, анализ аномалий | [LinkedIn](https://www.linkedin.com/in/bekzat-uteulin-98082b2b6/)
+- tsu: Дизайн, презентация | [LinkedIn](https://www.linkedin.com/in/saltanat-tlegen-b43138380/)
+
+## Полезные ссылки
+- [Демо](https://indrive.notsofar.live)
+- [Папа со презентацией](https://drive.google.com/drive/folders/1_iUVDPaoIMY0XAkwV2OdvYzY7o-DGjer?usp=sharing)
+- [Сайт хакатона Decentraton 4.0](https://astanahub.com/en/event/decentrathon-4-0)
+
+# Для разработчиков
+
 ## Установка и запуск
 1. Клонируйте репозиторий:
     ```bash
@@ -72,14 +86,3 @@ npm start
 npm run build
 ```
 Собранные файлы будут помещены в папку `web/out`.
-
-## Команда
-- omga: Frontend, API, писал этот файл | [LinkedIn](https://www.linkedin.com/in/omgaxd/)
-- c0st1nus: Backend, БД | [LinkedIn](https://www.linkedin.com/in/konstantin-koshevoy-336608324/)
-- govnejri: ML, анализ аномалий | [LinkedIn](https://www.linkedin.com/in/bekzat-uteulin-98082b2b6/)
-- tsu: Дизайн, презентация | [LinkedIn](https://www.linkedin.com/in/saltanat-tlegen-b43138380/)
-
-## Полезные ссылки
-- [Демо](https://indrive.notsofar.live)
-- [Папа со презентацией](https://drive.google.com/drive/folders/1_iUVDPaoIMY0XAkwV2OdvYzY7o-DGjer?usp=sharing)
-- [Сайт хакатона Decentraton 4.0](https://astanahub.com/en/event/decentrathon-4-0)
