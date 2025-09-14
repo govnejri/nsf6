@@ -11,7 +11,7 @@ use crate::database::model::points::{self, Entity as Points};
 #[derive(Debug, Deserialize, Serialize, ToSchema, Clone)]
 pub struct MapPoint {
     pub lat: f64,
-    pub long: f64,
+    pub lng: f64,
 }
 
 #[derive(Debug, Deserialize, Serialize, ToSchema, Clone)]
@@ -242,8 +242,8 @@ pub async fn get_traficmap(
                 data.push(TraficTile {
                     count,
                     neighbor_count,
-                    top_left: MapPoint { lat: tile_lat_min, long: tile_lon_min },
-                    bottom_right: MapPoint { lat: tile_lat_max, long: tile_lon_max },
+                    top_left: MapPoint { lat: tile_lat_min, lng: tile_lon_min },
+                    bottom_right: MapPoint { lat: tile_lat_max, lng: tile_lon_max },
                 });
             }
         }
